@@ -13,7 +13,7 @@ public class Drink {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true,name ="drink_name")
     private String Drink_name;
 
     private int Drink_quantity;

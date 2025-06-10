@@ -4,10 +4,13 @@ import com.ics.distributed_drinks_system.dtos.OrderRequest;
 import com.ics.distributed_drinks_system.models.Branch;
 import com.ics.distributed_drinks_system.models.Order;
 import com.ics.distributed_drinks_system.models.OrderStatus;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public interface OrderService {
+
     Order createOrder(OrderRequest request);
     double calculateTotal(Order order);
     void updateInventory(Order order);

@@ -1,16 +1,23 @@
 package com.ics.distributed_drinks_system.dtos;
 
 
+import com.ics.distributed_drinks_system.models.Branch;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 
 import java.util.List;
 
 @Data
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderRequest {
-    private int customerId;
-    private int branchId;
+
+    private Long customerId;
+
+    private Branch branch;
+
     private List<OrderItemRequest> items;
 }
 

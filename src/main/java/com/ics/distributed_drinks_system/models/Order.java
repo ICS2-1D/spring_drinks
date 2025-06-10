@@ -1,13 +1,42 @@
 package com.ics.distributed_drinks_system.models;
 
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
 import java.sql.Timestamp;
 import java.util.List;
 
+@Data
+@RequiredArgsConstructor
+@Entity
+@Table(name = "orders")
 public class Order {
-    private int orderId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long orderId;
+
+    @Column(unique = true, name = "order_number")
+    private String orderNumber;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> items;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "branch")
     private Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private Customer customer;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_status")
     private OrderStatus orderStatus;
+
+    @Column(name = "order_date")
     private Timestamp orderDate;
+
+    @Column(name = "total_amount")
+    private double totalAmount;
 }

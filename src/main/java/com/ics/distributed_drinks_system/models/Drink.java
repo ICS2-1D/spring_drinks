@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @Data
 @RequiredArgsConstructor
 @Entity
@@ -14,9 +16,14 @@ public class Drink {
     private Long id;
 
     @Column(unique = true,name ="drink_name")
-    private String Drink_name;
+    private String drinkName;
 
-    private int Drink_quantity;
+    @Column(name = "drink_quantity")
+    private int DrinkQuantity;
 
-    private double Drink_price;
+    @Column(name = "drink_price")
+    private double DrinkPrice;
+
+    @OneToMany(mappedBy = "drink", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderItem> orderItems;
 }

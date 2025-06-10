@@ -4,31 +4,283 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="Drinks.css">
-    <title>Available Drinks</title>
+    <title>SipForYou</title>
 </head>
 <body class="body">
-    <header class="header">
-        <h1>Available Drinks</h1>
-    </header>
-    <main class="main">
-        <section class="drinks-section">
-            <div class="drink-item">
-                <h2>Coca-Cola</h2>
-                <p>Price:</p>
+    <nav class="navbar">
+        <div class = "logo">
+            <h2>🍷 Premium Wine store</h2>
+        </div>
+        <div>
+        <ul class="nav-menu">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#wines">Wines</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#cart" class="cart-btn">🛒 Cart (0)</a></li>
+        </ul>
+    </div> 
+    </nav>
 
-                <img src="https://example.com/coca-cola.jpg" alt="Coca-Cola" class="drink-image">
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Welcome to SipForYou</h1>
+            <p>A sip that's a toast to the future</p>
+            <div class="store-info-desktop">
+                <div class="store-badge">
+                    <span class="store-name">SipForYou</span>
+                    <span class="deliver-info">🚚 Delivery in 20 minutes</span>
+                    <span class="save-offer">💰 Save on Select Items</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <main class="main-content">
+        <div class="container">
+            <section class="wine-collection">
+                <h2 class="section-title">Our Drinks Collection</h2>
+
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All Drinks</button>
+                     <button class="filter-btn" data-filter="red">Red Wine</button>
+                    <button class="filter-btn" data-filter="white">White Wine</button>
+                    <button class="filter-btn" data-filter="rose">Rosé Wine</button>
+                    <button class="filter-btn" data-filter="sparkling">Sparkling</button>
                 </div>
 
+                    <!--Drinks grid-->
+
+                    <div class="drinks-selection">
+                        <div class="drink-item" data-category="red">
+                            <div class="product-image red-wine">
+                            <div class="bottle shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                            <div class="product-info">
+                                <h3 class="product-name">Simonsig Cabernet Sauvignon</h3>
+                            <p class="product-description">Full-bodied red wine with rich tannins</p>
+                            <div class="product-price">KES 2,400.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
+
+
+                    <!-- Rosé Wines -->
+                    <div class="drink-item" data-category="rose">
+                        <div class="product-image rose-wine">
+                            <div class="bottle-shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Rose Sex on the Beach</h3>
+                            <p class="product-description">Light and refreshing summer wine</p>
+                            <div class="product-price">KES 1,700.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
+
+
+
+                    <div class="drink-item" data-category="rose">
+                        <div class="product-image rose-wine">
+                            <div class="bottle-shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Tall Horse Pinotage Rosé</h3>
+                            <p class="product-description">Elegant rosé with fruity notes</p>
+                            <div class="product-price">KES 1,950.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
+
+
+
+                    <div class="drink-item" data-category="white">
+                        <div class="product-image white-wine">
+                            <div class="bottle-shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Zevenwacht Chardonnay 2022</h3>
+                            <p class="product-description">Crisp and elegant white wine</p>
+                            <div class="product-price">KES 3,500.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
+
+
+
+                    <div class="drink-item" data-category="white">
+                        <div class="product-image white-wine">
+                            <div class="bottle-shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Simonsig Cape Fox Chardonnay</h3>
+                            <p class="product-description">Premium aged Chardonnay</p>
+                            <div class="product-price">KES 3,950.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
+
+
+
+                    <div class="drink-item" data-category="white">
+                        <div class="product-image white-wine">
+                            <div class="bottle-shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Nabygelegen Scaramanga</h3>
+                            <p class="product-description">Unique blend with complex flavors</p>
+                            <div class="product-price">KES 4,000.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
+
+
+
+                    <div class="drink-item" data-category="white">
+                        <div class="product-image white-wine">
+                            <div class="bottle-shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Decanal Pinot Grigio</h3>
+                            <p class="product-description">Light and refreshing Italian style</p>
+                            <div class="product-price">KES 2,300.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
+
+
+
+                    <div class="drink-item" data-category="white">
+                        <div class="product-image yellow-wine">
+                            <div class="bottle-shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Arabella Natural Sweet White</h3>
+                            <p class="product-description">Sweet dessert wine</p>
+                            <div class="product-price">KES 1,780.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
 
 
 
 
+                     <div class="drink-item" data-category="sparkling">
+                        <div class="product-image sparkling-wine">
+                            <div class="bottle-shape">
+                                <div class="bottle-neck"></div>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">Veuve Ambal Sparkling Rosé</h3>
+                            <p class="product-description">Celebration sparkling wine</p>
+                            <div class="product-price">KES 2,300.00</div>
+                            <button class="add-btn">Add to Cart</button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </main>
 
 
-    <footer>
-        <p>For more information, visit our <a href="https://example.com">website</a>.</p>
-        <p>&copy; 2025 Drink Store</p>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>We are passionate about bringing you the finest wines and drinks from around the world. Our collection is carefully curated to ensure quality and variety.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Email: sipforyou@gmail.com</p>
+                    <p>Phone: +254 700 000 000</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Facebook | Instagram | Twitter</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 SipForYou. All rights reserved.</p>
+            </div>  
+        </div>
     </footer>
+
+    <script>
+        let cart = [];
+        let cartCount = 0;
+
+        // Add to cart functionality
+        document.querySelectorAll('.add-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const drinkItem = this.closest('.drink-item');
+                const productName = drinkItem.querySelector('.product-name').textContent;
+                const productPrice = drinkItem.querySelector('.product-price').textContent;
+                
+                // Add to cart
+                cart.push({
+                    name: productName,
+                    price: productPrice
+                });
+                
+                cartCount++;
+                document.querySelector('.cart-btn').textContent = `🛒 Cart (${cartCount})`;
+                
+                // Button animation
+                this.textContent = 'Added!';
+                this.style.background = '#4CAF50';
+                this.style.color = 'white';
+                
+                setTimeout(() => {
+                    this.textContent = 'Add to Cart';
+                    this.style.background = '';
+                    this.style.color = '';
+                }, 2000);
+                
+                console.log(`Added ${productName} - ${productPrice} to cart`);
+            });
+        });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                const items = document.querySelectorAll('.drink-item');
+                
+                items.forEach(item => {
+                    if (filter === 'all' || item.getAttribute('data-category') === filter) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+
+
 </body>
 </html>

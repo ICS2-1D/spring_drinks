@@ -25,6 +25,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    height: 80px;
 }
 
 .nav-container {
@@ -173,9 +174,9 @@ body {
 }
 
 /* Drinks Section - Desktop Grid */
-.drinks-section {
+.drinks-selection {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: 30px;
     padding: 0;
 }

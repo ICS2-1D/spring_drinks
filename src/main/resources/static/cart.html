@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" sizes="40x40" href="icon.png" type="image/png">
+    <link rel="stylesheet" href="Drinks.css">
+    <title>Shopping Cart - Spring Drinks</title>
+</head>
+<body class="body">
+    <nav class="navbar">
+        <div class="logo">
+            <h2>🍷Spring Drinks</h2>
+        </div>
+        <div>
+            <ul class="nav-menu">
+                <li><a href="Drinks.html">Home</a></li>
+                <li><a href="Drinks.html#wines">Wines</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#cart" class="cart-btn">🛒 Cart (<span id="cart-count">0</span>)</a></li>
+            </ul>
+        </div> 
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Your Shopping Cart</h1>
+            <p>Review your selected drinks before checkout</p>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <div class="container">
+            <div id="cart-container">
+                <div id="empty-cart" style="text-align: center; padding: 3rem;">
+                    <h2>Your cart is empty</h2>
+                    <p>Add some drinks to get started!</p>
+                    <a href="Drinks.html" class="add-btn" style="display: inline-block; text-decoration: none; margin-top: 1rem;">Continue Shopping</a>
+                </div>
+
+                <div id="cart-items" style="display: none;">
+                    <h2 class="section-title">Cart Items</h2>
+                    <div id="items-list"></div>
+                    
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); margin-top: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h3 style="font-size: 1.5rem; color: #333;">Total: KSH <span id="total-price">0</span></h3>
+                            <div>
+                                <button id="clear-cart" class="filter-btn" style="margin-right: 1rem;">Clear Cart</button>
+                                <a href="payment.html" class="add-btn" id="checkout-btn" style="text-decoration: none;">Checkout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>We are passionate about bringing you the finest wines and drinks from around the world. Our collection is carefully curated to ensure quality and variety.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Email: springdrinks@gmail.com</p>
+                    <p>Phone: +254 700 000 000</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Facebook | Instagram | Twitter</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 SpringDrinks. All rights reserved.</p>
+            </div>  
+        </div>
+    </footer>
+
+    <script>
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  const itemsList = document.getElementById("items-list");
+  const totalPriceElement = document.getElementById("total-price");
+
+  if (cart.length > 0) {
+    document.getElementById("empty-cart").style.display = "none";
+    document.getElementById("cart-items").style.display = "block";
+
+    cart.forEach((item, index) => {
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.marginBottom = "1rem";
+
+      row.innerHTML = `
+        <div><strong>${item.name}</strong><br>KSH ${item.price}</div>
+        <div>
+          <input type="number" min="1" value="${item.quantity}" id="qty-${index}" style="width: 60px; padding: 5px;">
+        </div>
+      `;
+
+      itemsList.appendChild(row);
+
+      // Update quantity when user types in a new number
+      row.querySelector(`#qty-${index}`).addEventListener("input", (e) => {
+        const newQty = parseInt(e.target.value) || 1;
+        cart[index].quantity = newQty;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateTotal();
+      });
+    });
+
+    updateTotal();
+  } else {
+    // Show empty cart message
+    document.getElementById("empty-cart").style.display = "block";
+    document.getElementById("cart-items").style.display = "none";
+  }
+
+  function updateTotal() {
+    let total = 0;
+    cart.forEach(item => {
+      total += item.price * item.quantity;
+    });
+    totalPriceElement.textContent = total.toFixed(2);
+    localStorage.setItem('cartTotal', total);
+  }
+
+  // Clear cart button
+  document.getElementById("clear-cart").addEventListener("click", () => {
+    localStorage.removeItem('cart');
+    localStorage.removeItem('cartTotal');
+    location.reload();
+  });
+</script>
+
+
+
+</body>
+</html>

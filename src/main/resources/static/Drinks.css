@@ -6,163 +6,136 @@
 }
 
 body {
-    background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
     color: #333;
     line-height: 1.6;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
 }
 
 /* Navigation */
 .navbar {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1rem 0;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     position: sticky;
     top: 0;
     z-index: 100;
-    height: 80px;
 }
 
-.nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 70px;
+.navbar .logo {
+    display: inline-block;
+    margin-left: 2rem;
 }
 
-.logo h2 {
+.navbar .logo h2 {
     color: white;
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 1.8rem;
+    font-weight: bold;
 }
 
 .nav-menu {
-    display: flex;
     list-style: none;
-    gap: 30px;
-    align-items: center;
+    display: inline-flex;
+    gap: 2rem;
+    float: right;
+    margin-right: 2rem;
+    margin-top: -2.5rem;
 }
 
-.nav-menu a {
+.nav-menu li a {
     color: white;
     text-decoration: none;
     font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 25px;
-    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
-.nav-menu a:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-2px);
-}
-
-.cart-btn {
-    background: rgba(255,255,255,0.2) !important;
-    border: 2px solid rgba(255,255,255,0.3);
+.nav-menu li a:hover,
+.cart-btn:hover {
+    background-color: rgba(255,255,255,0.2);
 }
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-    padding: 80px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 0;
     text-align: center;
 }
 
 .hero-content h1 {
-    font-size: 3.5rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 20px;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
 }
 
 .hero-content p {
-    font-size: 1.3rem;
-    color: #666;
-    margin-bottom: 40px;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
 }
 
 .store-info-desktop {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
+    margin-top: 2rem;
 }
 
 .store-badge {
-    background: white;
-    padding: 20px 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
+    background: rgba(255,255,255,0.1);
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    display: inline-block;
 }
 
 .store-name {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #2c3e50;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 0.5rem;
 }
 
-.delivery-info, .save-offer {
-    font-size: 1rem;
-    color: #666;
-}
-
+.deliver-info,
 .save-offer {
-    background: #e74c3c;
-    color: white;
-    padding: 5px 15px;
-    border-radius: 20px;
+    margin: 0 1rem;
     font-size: 0.9rem;
-    font-weight: 600;
 }
 
 /* Main Content */
 .main-content {
-    padding: 60px 0;
+    padding: 3rem 0;
 }
 
-.wine-collection {
-    margin-bottom: 60px;
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
 }
 
 .section-title {
-    font-size: 2.5rem;
     text-align: center;
-    color: #2c3e50;
-    margin-bottom: 50px;
-    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #333;
 }
 
 /* Filter Buttons */
 .filter-buttons {
     display: flex;
     justify-content: center;
-    gap: 15px;
-    margin-bottom: 50px;
+    gap: 1rem;
+    margin-bottom: 3rem;
     flex-wrap: wrap;
 }
 
 .filter-btn {
-    padding: 12px 25px;
+    background: white;
     border: 2px solid #667eea;
-    background: transparent;
     color: #667eea;
+    padding: 0.75rem 1.5rem;
     border-radius: 25px;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.3s ease;
-    font-size: 1rem;
 }
 
 .filter-btn:hover,
@@ -170,81 +143,120 @@ body {
     background: #667eea;
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
-/* Drinks Section - Desktop Grid */
+/* Drinks Grid */
 .drinks-selection {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 30px;
-    padding: 0;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 1rem 0;
 }
 
-/* Individual Drink Items */
 .drink-item {
     background: white;
     border-radius: 15px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    gap: 1.5rem;
 }
 
 .drink-item:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
 }
 
-/* Product Images - Larger for Desktop */
+/* Product Images */
 .product-image {
-    width: 100px;
-    height: 150px;
-    border-radius: 15px;
-    margin-bottom: 20px;
+    width: 80px;
+    height: 120px;
+    border-radius: 10px;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
-.drink-item:hover .product-image {
-    transform: scale(1.05);
-}
-
-/* Wine Bottle Colors */
+/* Wine Bottle Styles */
 .red-wine {
     background: linear-gradient(135deg, #8B0000 0%, #4B0000 100%);
-}
-
-.rose-wine {
-    background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
 }
 
 .white-wine {
     background: linear-gradient(135deg, #F5F5DC 0%, #DDD 100%);
 }
 
-.yellow-wine {
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+.rose-wine {
+    background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
 }
 
 .sparkling-wine {
     background: linear-gradient(135deg, #FFE4E1 0%, #FFC0CB 100%);
 }
 
-/* Wine Bottle Shape - Larger for Desktop */
+.yellow-wine {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+}
+
+/* Soda Can Styles */
+.soda-cola {
+    background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%);
+}
+
+.soda-orange {
+    background: linear-gradient(135deg, #FF8C00 0%, #FF4500 100%);
+}
+
+.soda-lemon {
+    background: linear-gradient(135deg, #32CD32 0%, #228B22 100%);
+}
+
+.soda-tonic {
+    background: linear-gradient(135deg, #4169E1 0%, #191970 100%);
+}
+
+.soda-ginger {
+    background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%);
+}
+
+/* Alcohol Bottle Styles */
+.beer-bottle {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+}
+
+.beer-dark {
+    background: linear-gradient(135deg, #2F4F4F 0%, #000000 100%);
+}
+
+.vodka-bottle {
+    background: linear-gradient(135deg, #E6E6FA 0%, #9370DB 100%);
+}
+
+.gin-bottle {
+    background: linear-gradient(135deg, #98FB98 0%, #00FA9A 100%);
+}
+
+.rum-bottle {
+    background: linear-gradient(135deg, #D2691E 0%, #8B4513 100%);
+}
+
+.cider-bottle {
+    background: linear-gradient(135deg, #FFFF00 0%, #FFD700 100%);
+}
+
+/* Bottle and Can Shapes */
 .bottle-shape {
     position: absolute;
-    top: 15px;
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 25px;
-    height: 100px;
+    width: 20px;
+    height: 80px;
     background: rgba(255,255,255,0.3);
-    border-radius: 15px;
+    border-radius: 10px;
 }
 
 .bottle-neck {
@@ -252,39 +264,58 @@ body {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 10px;
-    height: 25px;
+    width: 8px;
+    height: 20px;
     background: rgba(255,255,255,0.4);
-    border-radius: 6px;
+    border-radius: 4px;
+}
+
+.can-shape {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 90px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 5px;
+}
+
+.can-top {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 25px;
+    height: 10px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
 }
 
 /* Product Information */
 .product-info {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex: 1;
 }
 
 .product-name {
     font-size: 1.3rem;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
 }
 
 .product-description {
-    font-size: 1rem;
     color: #666;
-    margin-bottom: 15px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
     line-height: 1.4;
 }
 
 .product-price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #e74c3c;
-    margin-bottom: 20px;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 1rem;
 }
 
 /* Add to Cart Button */
@@ -292,14 +323,12 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 0.75rem 1.5rem;
     border-radius: 25px;
-    font-size: 1rem;
-    font-weight: 600;
     cursor: pointer;
+    font-weight: bold;
     transition: all 0.3s ease;
-    width: 100%;
-    max-width: 160px;
+    font-size: 1rem;
 }
 
 .add-btn:hover {
@@ -313,106 +342,92 @@ body {
 
 /* Footer */
 .footer {
-    background: #2c3e50;
+    background: #333;
     color: white;
-    padding: 50px 0 20px;
-    margin-top: 80px;
+    padding: 3rem 0 1rem;
+    margin-top: 4rem;
 }
 
 .footer-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 40px;
-    margin-bottom: 30px;
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
 .footer-section h3 {
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-    color: #ecf0f1;
+    margin-bottom: 1rem;
+    color: #667eea;
 }
 
 .footer-section p {
-    color: #bdc3c7;
-    line-height: 1.6;
+    margin-bottom: 0.5rem;
+    color: #ccc;
 }
 
 .footer-bottom {
     text-align: center;
-    padding-top: 20px;
-    border-top: 1px solid #34495e;
-    color: #bdc3c7;
+    padding-top: 2rem;
+    border-top: 1px solid #555;
+    color: #999;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .hero-content h1 {
-        font-size: 2.5rem;
-    }
-    
     .nav-menu {
-        gap: 15px;
+        flex-direction: column;
+        gap: 1rem;
+        float: none;
+        margin: 1rem 0 0 2rem;
     }
-    
-    .nav-menu a {
-        padding: 6px 12px;
-        font-size: 0.9rem;
+
+    .hero-content h1 {
+        font-size: 2rem;
     }
-    
-    .drinks-section {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+
+    .drinks-selection {
+        grid-template-columns: 1fr;
     }
-    
+
     .drink-item {
-        padding: 20px;
+        flex-direction: column;
+        text-align: center;
     }
-    
+
     .product-image {
-        width: 100px;
-        height: 150px;
+        margin-bottom: 1rem;
     }
-    
-    .bottle-shape {
-        width: 25px;
-        height: 100px;
+
+    .filter-buttons {
+        flex-direction: column;
+        align-items: center;
     }
-    
-    .bottle-neck {
-        width: 10px;
-        height: 25px;
-    }
-    
-    .store-badge {
-        padding: 15px 25px;
+
+    .container {
+        padding: 0 1rem;
     }
 }
 
 @media (max-width: 480px) {
-    .nav-container {
-        flex-direction: column;
-        height: auto;
-        padding: 15px 20px;
+    .hero {
+        padding: 2rem 0;
     }
-    
-    .nav-menu {
-        margin-top: 15px;
-    }
-    
+
     .hero-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .section-title {
         font-size: 2rem;
     }
-    
-    .drinks-section {
-        grid-template-columns: 1fr;
+
+    .store-badge {
+        padding: 0.5rem 1rem;
     }
-    
-    .filter-buttons {
-        gap: 10px;
-    }
-    
-    .filter-btn {
-        padding: 10px 20px;
-        font-size: 0.9rem;
+
+    .deliver-info,
+    .save-offer {
+        display: block;
+        margin: 0.25rem 0;
     }
 }

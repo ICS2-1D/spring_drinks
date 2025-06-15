@@ -19,6 +19,17 @@
             <version>5.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.ics</groupId>
+            <artifactId>shared-models</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
         <!-- Optional: For JSON serialization/deserialization -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

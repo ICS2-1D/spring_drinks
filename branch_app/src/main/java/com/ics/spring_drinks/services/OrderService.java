@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface OrderService {
-
     Order createOrder(OrderRequest request);
     double calculateTotal(long orderId);
     void changeOrderStatusAndUpdateInventory(int orderId, OrderStatus newStatus);

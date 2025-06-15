@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
+@Data
+@RequiredArgsConstructor
 @Embeddable
 public class Customer {
-    private String name;
-    private String phoneNumber;
+    private String customer_name;
+    private String customer_phone_number;
 }

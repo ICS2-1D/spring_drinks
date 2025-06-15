@@ -3,15 +3,13 @@ package com.ics.dtos;
 
 import com.ics.models.Branch;
 import lombok.Data;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class OrderRequest {
     private Long customerId;
     private Branch branch;

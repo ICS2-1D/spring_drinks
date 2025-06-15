@@ -1,7 +1,6 @@
 package com.ics.spring_drinks.controllers;
 
 
-import com.ics.dtos.CustomerDto;
 import com.ics.dtos.OrderItemResponse;
 import com.ics.dtos.OrderRequest;
 import com.ics.dtos.OrderResponse;
@@ -52,8 +51,10 @@ public class OrderController {
         response.setOrderDate(order.getOrderDate());
 
         Customer customer = order.getCustomer();
-        CustomerDto customerDto = new CustomerDto(customer.getId(), customer.getName(), customer.getPhoneNumber());
-        response.setCustomerDto(customerDto);
+        if (customer != null) {
+            response.setCustomerName(customer.getCustomer_name());
+            response.setCustomerPhoneNumber(customer.getCustomer_phone_number());
+        }
 
         List<OrderItemResponse> items = order.getItems().stream()
                 .map(item -> new OrderItemResponse(

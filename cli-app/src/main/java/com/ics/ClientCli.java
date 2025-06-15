@@ -1,6 +1,6 @@
 package com.ics;
 
-import com.ics.dtos.CustomerDto;
+
 import com.ics.dtos.DrinkDto;
 import com.ics.dtos.OrderItemRequest;
 import com.ics.dtos.OrderRequest;
@@ -9,6 +9,8 @@ import com.ics.models.Branch;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.ics.models.Customer;
+
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -22,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+
+
 public class ClientCli {
 
    // base URL for the backend API
@@ -34,13 +38,13 @@ public class ClientCli {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // 1. Welcome the user and register them in the system.
-        CustomerDto customer = welcomeAndRegisterCustomer();
+       Customer customer = welcomeCustomer();
         if (customer == null) {
             System.out.println("Could not register customer. Exiting application.");
             return;
         }
 
-        System.out.println("\n✅ Welcome, " + customer.getName() + "! Your customer ID is " + customer.getId());
+        System.out.println("\n✅ Welcome, " + customer.getCustomer_name());
 
         while (true) {
             // 2. Main menu loop
@@ -64,7 +68,7 @@ public class ClientCli {
         System.out.println("\nThank you for visiting! Have a great day! 🎉");
     }
 
-    private static CustomerDto welcomeAndRegisterCustomer() throws IOException, InterruptedException {
+    private static Customer welcomeCustomer() throws IOException, InterruptedException {
         System.out.println("🍹====================================🍹");
         System.out.println("      WELCOME TO SPRING DRINKS!");
         System.out.println("🍹====================================🍹");
@@ -73,32 +77,13 @@ public class ClientCli {
         System.out.print("📱 What's your phone number? ");
         String phone = scanner.nextLine();
 
-        // Create a CustomerDto object from user input
-        CustomerDto newCustomer = new CustomerDto(null, name, phone);
-
-        // Convert the DTO to a JSON string
-        String requestBody = gson.toJson(newCustomer);
-
-        // Build the HTTP POST request to create a customer
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(API_BASE_URL + "/customer"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        // Send the request and get the response
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
-            // Convert the JSON response back to a CustomerDto object
-            return gson.fromJson(response.body(), CustomerDto.class);
-        } else {
-            System.out.println("Error creating customer: " + response.body());
-            return null;
-        }
+        Customer customer = new Customer();
+        customer.setCustomer_name(name);
+        customer.setCustomer_phone_number(phone);
+        return customer;
     }
 
-    private static void placeOrder(CustomerDto customer) throws IOException, InterruptedException {
+    private static void placeOrder(Customer customer) throws IOException, InterruptedException {
         // Get the list of available drinks from the API
         List<DrinkDto> availableDrinks = getDrinksMenu();
         if (availableDrinks == null || availableDrinks.isEmpty()) {
@@ -176,7 +161,7 @@ public class ClientCli {
     }
 
 
-    private static void checkout(CustomerDto customer, List<OrderItemRequest> items, Map<Long, DrinkDto> drinksMap) throws IOException, InterruptedException {
+    private static void checkout(Customer customer, List<OrderItemRequest> items, Map<Long, DrinkDto> drinksMap) throws IOException, InterruptedException {
         System.out.println("\n--- 🛒 YOUR ORDER SUMMARY ---");
         double total = 0;
         System.out.printf("%-20s %-10s %-10s %-10s%n", "Drink", "Quantity", "Unit Price", "Subtotal");
@@ -198,10 +183,13 @@ public class ClientCli {
             return;
         }
 
-        // NOTE: Assuming Branch ID 1 for this CLI.
-        // In a real app, this might be selected or configured.
-        Branch branch = Branch.NAIROBI; // ✅ or get from user input
-        OrderRequest orderRequest = new OrderRequest(customer.getId(), branch, items);
+        OrderRequest orderRequest = new OrderRequest();
+        orderRequest.setCustomerName(customer.getCustomer_name());
+        orderRequest.setCustomerPhoneNumber(customer.getCustomer_phone_number());
+        orderRequest.setBranch(Branch.NAIROBI);
+        orderRequest.setItems(items);
+
+
         String requestBody = gson.toJson(orderRequest);
 
         HttpRequest request = HttpRequest.newBuilder()

@@ -2,7 +2,7 @@ package com.ics.spring_drinks.services.impl;
 
 import com.ics.dtos.OrderRequest;
 import com.ics.models.*;
-import com.ics.spring_drinks.repository.CustomerRepository;
+//import com.ics.spring_drinks.repository.CustomerRepository;
 import com.ics.spring_drinks.repository.DrinkRepository;
 import com.ics.spring_drinks.repository.OrderItemRepository;
 import com.ics.spring_drinks.repository.OrderRepository;
@@ -22,18 +22,18 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final DrinkRepository drinkRepository;
-    private final CustomerRepository customerRepository;
+//    private final CustomerRepository customerRepository;
     private final OrderItemRepository orderItemRepository;
 
 
     @Override
     public Order createOrder(OrderRequest request) {
-        Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
         Order order = new Order();
-        order.setOrderNumber(generateOrderNumber());
+        Customer customer = new Customer();
+        customer.setCustomer_name(request.getCustomerName());
+        customer.setCustomer_phone_number(request.getCustomerPhoneNumber());
         order.setCustomer(customer);
+        order.setOrderNumber(generateOrderNumber());
         order.setBranch(request.getBranch());
         order.setOrderStatus(OrderStatus.PENDING);
         order.setOrderDate(new Timestamp(System.currentTimeMillis()));
@@ -59,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setOrder(order);
             orderItem.setDrink(drink);
             orderItem.setQuantity(itemRequest.getQuantity());
-            orderItem.setUnitPrice((drink.getDrinkPrice() * itemRequest.getQuantity()));
+            orderItem.setUnitPrice((drink.getDrinkPrice()));
             orderItem.setTotalPrice(drink.getDrinkPrice() * itemRequest.getQuantity());
             orderItems.add(orderItem);
             totalAmount += orderItem.getTotalPrice();
@@ -83,15 +83,11 @@ public class OrderServiceImpl implements OrderService {
         return "ORD-" + (int) (Math.random() * 1000);
     }
 
-//    @Override
-//    public List<Order> getOrdersByBranch(Branch branch) {
-//        return orderRepository.findByBranch(branch);
-//    }
-
     @Override
     public double calculateTotal(long orderId) {
-        Order order = orderRepository.findById((int) orderId)
+        Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+
         return order.getItems().stream()
                 .mapToDouble(OrderItem::getTotalPrice)
                 .sum();
@@ -100,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void changeOrderStatusAndUpdateInventory(int orderId, OrderStatus newStatus) {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         if (order.getOrderStatus() == OrderStatus.COMPLETED || order.getOrderStatus() == OrderStatus.CANCELLED) {
             throw new RuntimeException("Cannot change status of a completed order or a cancelled order.");

@@ -1,4 +1,4 @@
-package com.ics.spring_drinks.dtos;
+package com.ics.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

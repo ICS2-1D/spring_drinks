@@ -1,7 +1,7 @@
-package com.ics.spring_drinks.dtos;
+package com.ics.dtos;
 
 
-import com.ics.spring_drinks.models.Branch;
+import com.ics.models.Branch;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -13,11 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderRequest {
-
     private Long customerId;
-
     private Branch branch;
-
     private List<OrderItemRequest> items;
+    private String CustomerName;
+    private String CustomerPhoneNumber;
 }
 

@@ -1,4 +1,4 @@
-package com.ics.spring_drinks.models;
+package com.ics.models;
 
 import jakarta.persistence.*;
 import lombok.Data;

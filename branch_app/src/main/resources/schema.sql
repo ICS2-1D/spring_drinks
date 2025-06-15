@@ -1,12 +1,12 @@
 -- ========================
 -- CUSTOMERS TABLE
 -- ========================
-CREATE TABLE IF NOT EXISTS customers
-(
-    id              BIGINT PRIMARY KEY AUTO_INCREMENT,
-    Customer_name   VARCHAR(255) UNIQUE,
-    Customer_number VARCHAR(20) UNIQUE
-);
+# CREATE TABLE IF NOT EXISTS customers
+# (
+#     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
+#     Customer_name   VARCHAR(255) UNIQUE,
+#     Customer_number VARCHAR(20) UNIQUE
+# );
 
 -- ========================
 -- DRINKS TABLE
@@ -30,11 +30,7 @@ CREATE TABLE IF NOT EXISTS orders
     customer_id  BIGINT,
     order_status VARCHAR(50), -- From OrderStatus enum
     order_date   TIMESTAMP,
-    total_amount DOUBLE,
-    CONSTRAINT fk_customer_id
-        FOREIGN KEY (customer_id)
-            REFERENCES customers (id)
-            ON DELETE SET NULL
+    total_amount DOUBLE
 );
 
 -- ========================

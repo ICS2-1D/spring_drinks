@@ -1,7 +1,7 @@
 package com.ics.spring_drinks.services.impl;
 
-import com.ics.spring_drinks.dtos.OrderRequest;
-import com.ics.spring_drinks.models.*;
+import com.ics.dtos.OrderRequest;
+import com.ics.models.*;
 import com.ics.spring_drinks.repository.CustomerRepository;
 import com.ics.spring_drinks.repository.DrinkRepository;
 import com.ics.spring_drinks.repository.OrderItemRepository;

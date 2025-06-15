@@ -1,7 +1,6 @@
 package com.ics.spring_drinks.controllers;
 
-import com.ics.spring_drinks.dtos.DrinkDto;
-import com.ics.spring_drinks.models.Drink;
+import com.ics.dtos.DrinkDto;
 import com.ics.spring_drinks.services.DrinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

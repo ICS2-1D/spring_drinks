@@ -1,8 +1,8 @@
 package com.ics.spring_drinks.services;
 
 
-import com.ics.spring_drinks.dtos.CustomerDto;
-import com.ics.spring_drinks.models.Customer;
+import com.ics.dtos.CustomerDto;
+import com.ics.models.Customer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

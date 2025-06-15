@@ -1,7 +1,7 @@
-package com.ics.spring_drinks.dtos;
+package com.ics.dtos;
 
-import com.ics.spring_drinks.models.Branch;
-import com.ics.spring_drinks.models.OrderStatus;
+import com.ics.models.Branch;
+import com.ics.models.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

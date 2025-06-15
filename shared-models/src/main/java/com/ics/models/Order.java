@@ -1,4 +1,4 @@
-package com.ics.spring_drinks.models;
+package com.ics.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -26,8 +26,7 @@ public class Order {
     @Column(name = "branch")
     private Branch branch;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    @Embedded
     private Customer customer;
 
     @Enumerated(EnumType.STRING)

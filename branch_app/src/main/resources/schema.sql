@@ -58,3 +58,21 @@ CREATE TABLE IF NOT EXISTS order_items
             ON DELETE CASCADE
 );
 
+-- ========================
+-- PAYMENTS TABLE
+-- ========================
+CREATE TABLE IF NOT EXISTS payments
+(
+    payment_id      BIGINT PRIMARY KEY AUTO_INCREMENT,
+    order_id        BIGINT,
+    customer_number VARCHAR(20), -- number used for the payment
+    payment_method  VARCHAR(50), -- e.g., M-PESA, CARD
+    payment_status  VARCHAR(50), -- e.g., SUCCESS, FAILED
+    transaction_id  VARCHAR(100) UNIQUE,
+    payment_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_payment_order_id
+        FOREIGN KEY (order_id)
+            REFERENCES orders (order_id)
+            ON DELETE CASCADE
+);

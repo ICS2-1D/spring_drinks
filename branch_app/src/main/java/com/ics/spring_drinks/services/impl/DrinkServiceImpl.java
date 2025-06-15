@@ -1,7 +1,7 @@
 package com.ics.spring_drinks.services.impl;
 
-import com.ics.spring_drinks.dtos.DrinkDto;
-import com.ics.spring_drinks.models.Drink;
+import com.ics.dtos.DrinkDto;
+import com.ics.models.Drink;
 import com.ics.spring_drinks.repository.DrinkRepository;
 import com.ics.spring_drinks.services.DrinkService;
 import lombok.RequiredArgsConstructor;

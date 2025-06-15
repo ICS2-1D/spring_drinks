@@ -1,13 +1,12 @@
 package com.ics.spring_drinks.controllers;
 
 
-import com.ics.spring_drinks.dtos.CustomerDto;
-import com.ics.spring_drinks.dtos.OrderItemResponse;
-import com.ics.spring_drinks.dtos.OrderRequest;
-import com.ics.spring_drinks.dtos.OrderResponse;
-import com.ics.spring_drinks.models.Customer;
-import com.ics.spring_drinks.models.Order;
-import com.ics.spring_drinks.models.OrderStatus;
+import com.ics.dtos.OrderItemResponse;
+import com.ics.dtos.OrderRequest;
+import com.ics.dtos.OrderResponse;
+import com.ics.models.Customer;
+import com.ics.models.Order;
+import com.ics.models.OrderStatus;
 import com.ics.spring_drinks.services.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -52,8 +51,10 @@ public class OrderController {
         response.setOrderDate(order.getOrderDate());
 
         Customer customer = order.getCustomer();
-        CustomerDto customerDto = new CustomerDto(customer.getId(), customer.getName(), customer.getPhoneNumber());
-        response.setCustomerDto(customerDto);
+        if (customer != null) {
+            response.setCustomerName(customer.getCustomer_name());
+            response.setCustomerPhoneNumber(customer.getCustomer_phone_number());
+        }
 
         List<OrderItemResponse> items = order.getItems().stream()
                 .map(item -> new OrderItemResponse(

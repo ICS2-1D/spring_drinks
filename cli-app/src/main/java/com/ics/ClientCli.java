@@ -28,7 +28,7 @@ import java.util.Scanner;
 
 public class ClientCli {
 
-   // base URL for the backend API
+    // base URL for the backend API
     private static final String API_BASE_URL = "http://localhost:8080";
 
     // Re-usable components for making HTTP requests and parsing JSON
@@ -38,7 +38,7 @@ public class ClientCli {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // 1. Welcome the user and register them in the system.
-       Customer customer = welcomeCustomer();
+        Customer customer = welcomeCustomer();
         if (customer == null) {
             System.out.println("Could not register customer. Exiting application.");
             return;
@@ -154,7 +154,8 @@ public class ClientCli {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
-            Type drinkListType = new TypeToken<ArrayList<DrinkDto>>(){}.getType();
+            Type drinkListType = new TypeToken<ArrayList<DrinkDto>>() {
+            }.getType();
             return gson.fromJson(response.body(), drinkListType);
         }
         return null;
@@ -166,7 +167,7 @@ public class ClientCli {
         double total = 0;
         System.out.printf("%-20s %-10s %-10s %-10s%n", "Drink", "Quantity", "Unit Price", "Subtotal");
         System.out.println("---------------------------------------------------");
-        for(OrderItemRequest item : items) {
+        for (OrderItemRequest item : items) {
             DrinkDto drink = drinksMap.get(item.getDrinkId());
             double subtotal = drink.getDrinkPrice() * item.getQuantity();
             System.out.printf("%-20s %-10d $%-9.2f $%-9.2f%n", drink.getDrinkName(), item.getQuantity(), drink.getDrinkPrice(), subtotal);
@@ -203,34 +204,49 @@ public class ClientCli {
         if (response.statusCode() == 201) { // 201 Created
             OrderResponse orderResponse = gson.fromJson(response.body(), OrderResponse.class);
             System.out.println("\n🎉 ORDER PLACED SUCCESSFULLY! Order Number: " + orderResponse.getOrderNumber());
-            simulatePayment(orderResponse.getOrderId());
+            simulatePayment(orderResponse.getOrderId(), customer.getCustomer_phone_number());
         } else {
             System.out.println("❌ Failed to place order: " + response.body());
         }
     }
 
 
-    private static void simulatePayment(Long orderId) throws IOException, InterruptedException {
+    private static void simulatePayment(Long orderId, String phoneNumber) throws IOException, InterruptedException {
         System.out.println("\n--- 💳 SIMULATING PAYMENT ---");
-        System.out.println("Processing with phone number...");
         Thread.sleep(1000);
-        System.out.println("Contacting payment provider...");
+        System.out.println("Processing with phone number...");
         Thread.sleep(1500);
         System.out.println("✅ Payment Approved!");
 
-        // Update the order status on the backend
-        HttpRequest request = HttpRequest.newBuilder()
+        // Update order status
+        HttpRequest statusUpdate = HttpRequest.newBuilder()
                 .uri(URI.create(API_BASE_URL + "/order/status/" + orderId + "?orderStatus=COMPLETED"))
                 .PUT(HttpRequest.BodyPublishers.noBody())
                 .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        client.send(statusUpdate, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() == 200) {
-            System.out.println("✅ Order status updated to COMPLETED.");
-            System.out.println("Thank you for your purchase!");
+        // Now simulate the payment record
+        Map<String, Object> paymentData = new HashMap<>();
+        paymentData.put("orderId", orderId);
+        paymentData.put("customerNumber", phoneNumber);
+        paymentData.put("paymentMethod", "M-PESA");
+        paymentData.put("paymentStatus", "SUCCESS");
+
+        String json = gson.toJson(paymentData);
+
+        HttpRequest paymentRequest = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/payments"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> response = client.send(paymentRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 201) {
+            System.out.println("✅ Payment recorded successfully!");
         } else {
-            System.out.println("Could not update order status on the server: " + response.body());
+            System.out.println("❌ Failed to record payment: " + response.body());
         }
     }
 }

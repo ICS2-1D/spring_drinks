@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" sizes="40x40" href="icon.png" type="image/png">
+    <link rel="stylesheet" href="Drinks.css">
+    <title>Payment - Spring Drinks</title>
+</head>
+<body class="body">
+    <nav class="navbar">
+        <div class="logo">
+            <h2>🍷Spring Drinks</h2>
+        </div>
+        <div>
+            <ul class="nav-menu">
+                <li><a href="Drinks.html">Home</a></li>
+                <li><a href="Drinks.html#wines">Wines</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="cart.html" class="cart-btn">🛒 Cart (<span id="cart-count">0</span>)</a></li>
+            </ul>
+        </div> 
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Complete Your Order</h1>
+            <p>Secure payment and delivery details</p>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                
+                <!-- Order Summary -->
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+                    <h2 style="color: #333; margin-bottom: 1.5rem;">Order Summary</h2>
+                    <div id="order-items"></div>
+                    <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid #f0f0f0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: #667eea;">
+                        <span>Total:</span>
+                        <span>KSH <span id="order-total">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Payment Form -->
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+                    <h2 style="color: #333; margin-bottom: 1.5rem;">Payment & Delivery</h2>
+                    
+                    <form id="payment-form">
+                        <!-- Personal Information -->
+                        <div style="margin-bottom: 2rem;">
+                            <h3 style="color: #667eea; margin-bottom: 1rem;">Personal Information</h3>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Full Name *</label>
+                                <input type="text" id="full-name" required style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Phone Number *</label>
+                                <input type="tel" id="phone" required style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" placeholder="+254 700 000 000">
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Email</label>
+                                <input type="email" id="email" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                            </div>
+                        </div>
+
+                        <!-- Delivery Address -->
+                        <div style="margin-bottom: 2rem;">
+                            <h3 style="color: #667eea; margin-bottom: 1rem;">Delivery Address</h3>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Street Address *</label>
+                                <input type="text" id="address" required style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">City *</label>
+                                    <input type="text" id="city" required style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" value="Nairobi">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Postal Code</label>
+                                    <input type="text" id="postal-code" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div style="margin-bottom: 2rem;">
+                            <h3 style="color: #667eea; margin-bottom: 1rem;">Payment Method</h3>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
+                                    <input type="radio" name="payment-method" value="mpesa" checked style="margin-right: 0.5rem;">
+                                    <span style="font-weight: bold;">M-Pesa</span>
+                                </label>
+                                <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
+                                    <input type="radio" name="payment-method" value="card" style="margin-right: 0.5rem;">
+                                    <span style="font-weight: bold;">Credit/Debit Card</span>
+                                </label>
+                                <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
+                                    <input type="radio" name="payment-method" value="cash" style="margin-right: 0.5rem;">
+                                    <span style="font-weight: bold;">Cash on Delivery</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- M-Pesa Details -->
+                        <div id="mpesa-details" style="margin-bottom: 2rem;">
+                            <h4 style="color: #333; margin-bottom: 1rem;">M-Pesa Payment</h4>
+                            <p style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                                You will receive an M-Pesa prompt on your phone number to complete the payment.
+                            </p>
+                        </div>
+
+                        <!-- Card Details -->
+                        <div id="card-details" style="display: none; margin-bottom: 2rem;">
+                            <h4 style="color: #333; margin-bottom: 1rem;">Card Details</h4>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Card Number</label>
+                                <input type="text" id="card-number" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" placeholder="1234 5678 9012 3456">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Expiry Date</label>
+                                    <input type="text" id="expiry" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" placeholder="MM/YY">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">CVV</label>
+                                    <input type="text" id="cvv" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" placeholder="123">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Special Instructions -->
+                        <div style="margin-bottom: 2rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Special Instructions (Optional)</label>
+                            <textarea id="instructions" rows="3" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem; resize: vertical;" placeholder="Any special delivery instructions..."></textarea>
+                        </div>
+
+                        <!-- Order Button -->
+                        <button type="submit" class="add-btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                            Complete Order
+                        </button>
+                    </form>
+                    <div id="thank-you-message" style="display: none; margin-top: 1.5rem; text-align: center; color: #28a745;">
+                        <h3>Thank you for your order!</h3>
+                        <p>Your order has been placed successfully. You will receive a confirmation shortly.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>We are passionate about bringing you the finest wines and drinks from around the world. Our collection is carefully curated to ensure quality and variety.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p>Email: springdrinks@gmail.com</p>
+                    <p>Phone: +254 700 000 000</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Facebook | Instagram | Twitter</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SpringDrinks. All rights reserved.</p>
+            </div>  
+        </div>
+    </footer>
+
+    <script>
+  // Get cart from localStorage
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let total = parseFloat(localStorage.getItem('cartTotal')) || 0;
+
+  function updateOrderSummary() {
+    const cartCount = document.getElementById('cart-count');
+    const orderItems = document.getElementById('order-items');
+    const orderTotal = document.getElementById('order-total');
+
+    // Update cart item count
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCount.textContent = totalItems;
+
+    // Clear and re-render order items
+    orderItems.innerHTML = '';
+    let runningTotal = 0;
+
+    cart.forEach(item => {
+      const itemTotal = item.price * item.quantity;
+      runningTotal += itemTotal;
+
+      const itemElement = document.createElement('div');
+      itemElement.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0;';
+      itemElement.innerHTML = `
+        <div>
+          <div style="font-weight: bold; color: #333;">${item.name}</div>
+          <div style="color: #666; font-size: 0.9rem;">KSH ${item.price.toLocaleString()} × ${item.quantity}</div>
+        </div>
+        <div style="font-weight: bold; color: #667eea;">KSH ${itemTotal.toLocaleString()}</div>
+      `;
+      orderItems.appendChild(itemElement);
+    });
+
+    // Display total
+    orderTotal.textContent = runningTotal.toLocaleString();
+  }
+
+  // Handle payment method toggles
+  document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+      const mpesaDetails = document.getElementById('mpesa-details');
+      const cardDetails = document.getElementById('card-details');
+
+      mpesaDetails.style.display = (this.value === 'mpesa') ? 'block' : 'none';
+      cardDetails.style.display = (this.value === 'card') ? 'block' : 'none';
+    });
+  });
+
+  // Form submission
+  document.getElementById('payment-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    // Collect form data
+    const formData = {
+      fullName: document.getElementById('full-name').value,
+      phone: document.getElementById('phone').value,
+      email: document.getElementById('email').value,
+      address: document.getElementById('address').value,
+      city: document.getElementById('city').value,
+      postalCode: document.getElementById('postal-code').value,
+      paymentMethod: document.querySelector('input[name="payment-method"]:checked').value,
+      instructions: document.getElementById('instructions').value,
+      items: cart,
+      total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    };
+
+    // Disable submit button
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Processing...';
+    submitBtn.disabled = true;
+
+    //Thank you message
+    document.getElementById('thank-you-message').style.display = 'block';
+
+    // Simulate order processing
+    setTimeout(() => {
+      alert(`Order placed successfully! 🎉\n\nOrder Total: KSH ${formData.total.toLocaleString()}\nDelivery Address: ${formData.address}, ${formData.city}\nPayment Method: ${formData.paymentMethod.toUpperCase()}\n\nYou will receive a confirmation message shortly.`);
+      localStorage.removeItem('cart');
+      localStorage.removeItem('cartTotal');
+      window.location.href = 'Drinks.html';
+    }, 2000);
+  });
+
+  // Redirect if cart is empty
+  if (cart.length === 0) {
+    alert('Your cart is empty! Redirecting to shop...');
+    window.location.href = 'Drinks.html';
+  } else {
+    updateOrderSummary();
+  }
+</script>
+
+</body>
+</html>

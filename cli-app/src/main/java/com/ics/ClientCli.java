@@ -31,18 +31,13 @@ public class ClientCli {
     // base URL for the backend API
     private static final String API_BASE_URL = "http://localhost:8080";
 
-    // Re-usable components for making HTTP requests and parsing JSON
+   // making HTTP requests and parsing JSON
     private static final HttpClient client = HttpClient.newHttpClient();
     private static final Gson gson = new Gson();
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        // 1. Welcome the user and register them in the system.
         Customer customer = welcomeCustomer();
-        if (customer == null) {
-            System.out.println("Could not register customer. Exiting application.");
-            return;
-        }
 
         System.out.println("\n✅ Welcome, " + customer.getCustomer_name());
 
@@ -56,7 +51,6 @@ public class ClientCli {
             String choice = scanner.nextLine();
 
             if ("1".equals(choice)) {
-                // 3. Start the ordering process
                 placeOrder(customer);
             } else if ("0".equals(choice)) {
                 break;
@@ -64,11 +58,10 @@ public class ClientCli {
                 System.out.println("❌ Invalid choice. Please try again.");
             }
         }
-
         System.out.println("\nThank you for visiting! Have a great day! 🎉");
     }
 
-    private static Customer welcomeCustomer() throws IOException, InterruptedException {
+    private static Customer welcomeCustomer(){
         System.out.println("🍹====================================🍹");
         System.out.println("      WELCOME TO SPRING DRINKS!");
         System.out.println("🍹====================================🍹");
@@ -167,10 +160,12 @@ public class ClientCli {
         double total = 0;
         System.out.printf("%-20s %-10s %-10s %-10s%n", "Drink", "Quantity", "Unit Price", "Subtotal");
         System.out.println("---------------------------------------------------");
+
         for (OrderItemRequest item : items) {
             DrinkDto drink = drinksMap.get(item.getDrinkId());
             double subtotal = drink.getDrinkPrice() * item.getQuantity();
             System.out.printf("%-20s %-10d $%-9.2f $%-9.2f%n", drink.getDrinkName(), item.getQuantity(), drink.getDrinkPrice(), subtotal);
+
             total += subtotal;
         }
         System.out.println("---------------------------------------------------");

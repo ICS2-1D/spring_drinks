@@ -51,16 +51,12 @@
                         <div class="mb-2">
                             <h3 class="payment-section-title">Customer Details</h3>
                             <div class="form-group">
-                                <label class="form-group-label">Full Name (Customer Name) *</label>
-                                <input type="text" id="full-name" name="customer_name" required class="form-control">
+                                <label for= "full-name" class="form-group-label">Full Name (Customer Name) *</label>
+                                <input type="text" id="full-name" name="customer_name" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-group-label">Phone Number (Customer Number) *</label>
                                 <input type="tel" id="phone" name="customer_phone_number" required class="form-control" placeholder="+254 7XX XXX XXX">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-group-label">Email</label>
-                                <input type="email" id="email" name="customer_email" class="form-control">
                             </div>
                         </div>
 
@@ -81,7 +77,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-group-label">Branch *</label>
+                                <label for= "branch" class="form-group-label">Branch *</label>
                                 <select id="branch" name="branch" required class="form-control">
                                     <option value="">Select Branch</option>
                                     <option value="Main_Branch">Nairobi (Main) Branch</option>
@@ -176,149 +172,218 @@
     </footer>
 
     <script>
-  // Get cart from localStorage
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  let total = parseFloat(localStorage.getItem('cartTotal')) || 0;
+    document.addEventListener('DOMContentLoaded', () => {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const totalPriceElement = document.getElementById('order-total'); // Corrected ID for total price display
 
-  function updateOrderSummary() {
-    const cartCount = document.getElementById('cart-count');
-    const orderItems = document.getElementById('order-items');
-    const orderTotal = document.getElementById('order-total');
+        // Update initial total display for order summary
+        const cartTotal = localStorage.getItem('cartTotal');
+        if (cartTotal) {
+            totalPriceElement.textContent = parseFloat(cartTotal).toLocaleString(); // Use toLocaleString for formatting
+        }
 
-    // Update cart item count
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalItems;
+        // Redirect if cart is empty
+        if (cart.length === 0) {
+            alert('Your cart is empty! Redirecting to shop...');
+            window.location.href = 'Drinks.html';
+            return; // Stop further execution
+        }
 
-    // Clear and re-render order items
-    orderItems.innerHTML = '';
-    let runningTotal = 0;
+        // --- Helper Function to Update Order Summary ---
+        function updateOrderSummary() {
+            const cartCount = document.getElementById('cart-count');
+            const orderItemsList = document.getElementById('order-items'); // Renamed to avoid conflict
+            const orderTotal = document.getElementById('order-total');
 
-    cart.forEach(item => {
-      const itemTotal = item.price * item.quantity;
-      runningTotal += itemTotal;
+            const totalItemsInCart = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItemsInCart;
 
-      const itemElement = document.createElement('div');
-      itemElement.className = 'order-item-row'; // Applied class
-      // itemElement.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0;'; // Replaced by class
-      itemElement.innerHTML = `
-        <div>
-          <div class="order-item-name">${item.name}</div> <div class="order-item-details">KSH ${item.price.toLocaleString()} × ${item.quantity}</div> </div>
-        <div class="order-item-price">KSH ${itemTotal.toLocaleString()}</div> `;
-      orderItems.appendChild(itemElement);
+            orderItemsList.innerHTML = ''; // Clear existing items
+
+            let runningTotal = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                runningTotal += itemTotal;
+
+                const itemElement = document.createElement('div');
+                itemElement.className = 'order-item-row';
+                itemElement.innerHTML = `
+                    <div>
+                        <div class="order-item-name">${item.name}</div>
+                        <div class="order-item-details">KSH ${item.price.toLocaleString()} × ${item.quantity}</div>
+                    </div>
+                    <div class="order-item-price">KSH ${itemTotal.toLocaleString()}</div>
+                `;
+                orderItemsList.appendChild(itemElement);
+            });
+
+            orderTotal.textContent = runningTotal.toLocaleString();
+            localStorage.setItem('cartTotal', runningTotal); // Ensure total is updated in localStorage
+        }
+
+        // --- Handle payment method toggles ---
+        document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const mpesaDetails = document.getElementById('mpesa-details');
+                const cardDetails = document.getElementById('card-details');
+
+                mpesaDetails.style.display = (this.value === 'M-PESA') ? 'block' : 'none';
+                cardDetails.style.display = (this.value === 'CARD') ? 'block' : 'none';
+            });
+        });
+
+        // --- Form Submission Logic ---
+        document.getElementById('payment-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Processing Order...';
+            submitBtn.disabled = true;
+
+            const thankYouMessage = document.getElementById('thank-you-message');
+            thankYouMessage.style.display = 'block'; // Show processing message
+
+            // Collect form data
+            const customerName = document.getElementById('full-name').value;
+            const customerPhoneNumber = document.getElementById('phone').value;
+            const customerEmail = document.getElementById('email') ? document.getElementById('email').value : null;
+            const deliveryAddress = document.getElementById('address').value;
+            const deliveryCity = document.getElementById('city').value;
+            const deliveryPostalCode = document.getElementById('postal-code').value;
+            const branch = document.getElementById('branch').value; // Ensure this element exists in HTML
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value; // Corrected name attribute
+
+            const specialInstructions = document.getElementById('instructions').value;
+            const totalAmount = parseFloat(localStorage.getItem('cartTotal')) || 0; // Get from localStorage
+
+            // Map cart items to OrderItemDTO structure
+            const orderItems = cart.map(item => ({
+                // Ensure your backend's OrderItemDTO is designed to receive 'drink_name'
+                // and then look up the drink 'id' on the backend.
+                // If it requires 'drinkId' directly from frontend, you'll need to store it in cart.
+                drink_name: item.name,
+                quantity: item.quantity,
+                unit_price: item.price,
+                total_price: item.price * item.quantity
+            }));
+
+            // 1. Prepare data for OrderController (createOrder)
+            const orderRequestData = {
+                customerName: customerName,
+                customerPhoneNumber: customerPhoneNumber,
+                customerEmail: customerEmail,
+                deliveryAddress: deliveryAddress,
+                deliveryCity: deliveryCity,
+                deliveryPostalCode: deliveryPostalCode,
+                branch: branch,
+                specialInstructions: specialInstructions,
+                orderItems: orderItems,
+                totalAmount: totalAmount
+            };
+
+            let orderResponse = null; // To store the successful order response
+
+            try {
+                // First: Create the Order
+                console.log("Sending order request:", orderRequestData);
+                const orderResponseRaw = await fetch('http://localhost:8080/order', { // Your OrderController path
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderRequestData),
+                });
+
+                if (!orderResponseRaw.ok) {
+                    // Attempt to parse JSON error message if available, otherwise fallback to text
+                    const errorText = await orderResponseRaw.text();
+                    let errorMessage = `Order creation failed: ${orderResponseRaw.status} - ${errorText}`;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.message) {
+                            errorMessage = `Order creation failed: ${orderResponseRaw.status} - ${errorJson.message}`;
+                        } else if (errorJson.error) {
+                            errorMessage = `Order creation failed: ${orderResponseRaw.status} - ${errorJson.error}`;
+                        }
+                    } catch (e) {
+                        // Not JSON, use plain text error message
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                orderResponse = await orderResponseRaw.json(); // Backend should return OrderResponse DTO
+                console.log('Order created successfully:', orderResponse);
+
+                // Now, if order creation was successful, proceed to simulate payment
+                // 2. Prepare data for PaymentController (simulatePayment)
+                const paymentRequestData = {
+                    orderId: orderResponse.orderId, // Use the orderId received from the backend
+                    customerNumber: customerPhoneNumber,
+                    paymentMethod: paymentMethod,
+                    amount: totalAmount,
+                    // Note: Card details are NOT sent to your backend directly.
+                    // This is a crucial security point. A real app would send these
+                    // securely to a payment gateway, NOT your server.
+                    // For M-PESA, you'd trigger STK push etc.
+                    // The PaymentController is a *simulation* that creates a payment record.
+                };
+
+                submitBtn.textContent = 'Processing Payment...'; // Update button text
+
+                console.log("Sending payment request:", paymentRequestData);
+                const paymentResponseRaw = await fetch('http://localhost:8080/payments', { // Your PaymentController path
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(paymentRequestData),
+                });
+
+                if (!paymentResponseRaw.ok) {
+                     const errorText = await paymentResponseRaw.text();
+                    let errorMessage = `Payment failed: ${paymentResponseRaw.status} - ${errorText}`;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.message) {
+                            errorMessage = `Payment failed: ${paymentResponseRaw.status} - ${errorJson.message}`;
+                        } else if (errorJson.error) {
+                            errorMessage = `Payment failed: ${paymentResponseRaw.status} - ${errorJson.error}`;
+                        }
+                    } catch (e) {
+                        // Not JSON, use plain text error message
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const paymentResponse = await paymentResponseRaw.json(); // Backend should return PaymentResponse DTO
+                console.log('Payment simulated successfully:', paymentResponse);
+
+                // --- If both order and payment successful ---
+                alert(`Order placed successfully! 🎉\n\nOrder Number: ${orderResponse.orderNumber}\nOrder Total: KSH ${totalAmount.toLocaleString()}\nDelivery Address: ${deliveryAddress}, ${deliveryCity}\nPayment Method: ${paymentMethod.toUpperCase()}\nTransaction ID: ${paymentResponse.transactionId || 'N/A'}\n\nYou will receive a confirmation message shortly.`);
+
+                localStorage.removeItem('cart');
+                localStorage.removeItem('cartTotal');
+                window.location.href = 'Drinks.html'; // Redirect to home/drinks page
+
+            } catch (error) {
+                console.error('There was an error placing the order:', error);
+                thankYouMessage.style.display = 'none'; // Hide processing message on error
+                alert(`Error placing order: ${error.message}. Please check console for details.`);
+
+                submitBtn.textContent = 'Place Order';
+                submitBtn.disabled = false;
+
+                // Log if order was created but payment failed (for backend debugging)
+                if (orderResponse && orderResponse.orderId) {
+                    console.warn(`Order ${orderResponse.orderId} was created, but payment failed. Manual intervention may be needed.`);
+                    // In a real app, you might send an additional request to update order status to 'PAYMENT_FAILED' here.
+                }
+            }
+        });
+
+        // Initial call to update order summary on page load
+        updateOrderSummary();
     });
-
-    // Display total
-    orderTotal.textContent = runningTotal.toLocaleString();
-  }
-
-  // Handle payment method toggles
-  document.querySelectorAll('input[name="payment_method"]').forEach(radio => { // Changed name to payment_method
-    radio.addEventListener('change', function () {
-      const mpesaDetails = document.getElementById('mpesa-details');
-      const cardDetails = document.getElementById('card-details');
-
-      mpesaDetails.style.display = (this.value === 'M-PESA') ? 'block' : 'none'; // Changed value check
-      cardDetails.style.display = (this.value === 'CARD') ? 'block' : 'none';   // Changed value check
-    });
-  });
-
-  // Form submission
-  document.getElementById('payment-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-    // Collect form data
-    const formData = {
-      customerName: document.getElementById('full-name').value, // Matches Customer_name
-      customerPhoneNumber: document.getElementById('phone').value, // Matches Customer_number, customer_phone_number
-      customerEmail: document.getElementById('email').value, // Additional customer info
-      deliveryAddress: document.getElementById('address').value,
-      deliveryCity: document.getElementById('city').value,
-      deliveryPostalCode: document.getElementById('postal-code').value,
-      branch: document.getElementById('branch').value, // New: for orders.branch
-      paymentMethod: document.querySelector('input[name="payment_method"]:checked').value, // Matches payments.payment_method
-      
-      //For testing card details
-      cardNumber: document.getElementById('card-number') ? document.getElementById('card-number').value : null,
-      expiry: document.getElementById('expiry') ? document.getElementById('expiry').value : null,
-      cvv: document.getElementById('cvv') ? document.getElementById('cvv').value : null,
-
-      //continue with the rest of the form data
-      specialInstructions: document.getElementById('instructions').value,
-      orderItems: cart.map(item => ({ // For order_items table
-          drink_name: item.name,
-          quantity: item.quantity,
-          unit_price: item.price,
-          total_price: item.price * item.quantity // Calculated total for each item
-      })),
-      totalAmount: cart.reduce((sum, item) => sum + item.price * item.quantity, 0) // Matches orders.total_amount
-    };
-
-    // Log formData (this is where you'd send it to a backend)
-    console.log("Order Data to be sent to Backend:", formData);
-
-    // Disable submit button
-    const submitBtn = this.querySelector('button[type="submit"]');
-    submitBtn.textContent = 'Processing...';
-    submitBtn.disabled = true;
-
-    //Thank you message
-    document.getElementById('thank-you-message').style.display = 'block';
-
-
-    //Sending data to backend
-    fetch('http://localhost:8080/api/orders', { // Adjust URL if your Spring Boot app runs on a different port
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-  })
-  .then(response => {
-      // Check if the response is OK (2xx status code)
-      if (response.ok) {
-          return response.text(); // Or .json() if your backend returns JSON
-      } else {
-          // If not OK, parse the error message from the backend
-          return response.text().then(errorText => { // Assuming backend sends plain text error messages
-              throw new Error(`Order failed: ${response.status} - ${errorText}`);
-          });
-      }
-  })
-  .then(data => {
-      // Success
-      console.log('Order successful:', data);
-      alert(`Order placed successfully! 🎉\n\nOrder Total: KSH ${formData.totalAmount.toLocaleString()}\nDelivery Address: ${formData.deliveryAddress}, ${formData.deliveryCity}\nPayment Method: ${formData.paymentMethod.toUpperCase()}\n\nYou will receive a confirmation message shortly.`);
-      localStorage.removeItem('cart');
-      localStorage.removeItem('cartTotal');
-      window.location.href = 'Drinks.html';
-  })
-  .catch(error => {
-      // Error handling
-      console.error('There was an error placing the order:', error);
-      alert(`Error placing order: ${error.message}. Please try again.`);
-      submitBtn.textContent = 'Place Order';
-      submitBtn.disabled = false;
-      document.getElementById('thank-you-message').style.display = 'none'; // Hide thank you on error
-  });
-
-    // Simulate order processing
-    setTimeout(() => {
-      alert(`Order placed successfully! 🎉\n\nOrder Total: KSH ${formData.totalAmount.toLocaleString()}\nDelivery Address: ${formData.deliveryAddress}, ${formData.deliveryCity}\nPayment Method: ${formData.paymentMethod}\n\nYou will receive a confirmation message shortly.`);
-      localStorage.removeItem('cart');
-      localStorage.removeItem('cartTotal');
-      window.location.href = 'Drinks.html';
-    }, 2000);
-  });
-
-  // Redirect if cart is empty
-  if (cart.length === 0) {
-    alert('Your cart is empty! Redirecting to shop...');
-    window.location.href = 'Drinks.html';
-  } else {
-    updateOrderSummary();
-  }
 </script>
 
 </body>

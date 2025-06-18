@@ -9,6 +9,16 @@
             "projectName": "distributed-drinks-system",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-SpringDrinksBackendApplication<distributed-drinks-system>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.ics.SpringDrinksBackendApplication",
+            "projectName": "distributed-drinks-system",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

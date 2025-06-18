@@ -33,22 +33,22 @@
     <main class="main-content">
         <div class="container">
             <div id="cart-container">
-                <div id="empty-cart" class="cart-empty-message">
+                <div id="empty-cart" style="text-align: center; padding: 3rem;">
                     <h2>Your cart is empty</h2>
                     <p>Add some drinks to get started!</p>
-                    <a href="Drinks.html" class="add-btn inline-block text-decoration-none mt-1">Continue Shopping</a>
+                    <a href="Drinks.html" class="add-btn" style="display: inline-block; text-decoration: none; margin-top: 1rem;">Continue Shopping</a>
                 </div>
 
                 <div id="cart-items" style="display: none;">
                     <h2 class="section-title">Cart Items</h2>
                     <div id="items-list"></div>
                     
-                    <div class="cart-total-summary">
-                        <div class="flex-between-center mb-2">
-                            <h3 class="font-size-md color-dark">Total: KSH <span id="total-price">0</span></h3>
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); margin-top: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h3 style="font-size: 1.5rem; color: #333;">Total: KSH <span id="total-price">0</span></h3>
                             <div>
-                                <button id="clear-cart" class="filter-btn mr-1">Clear Cart</button>
-                                <a href="payment.html" class="add-btn text-decoration-none" id="checkout-btn">Checkout</a>
+                                <button id="clear-cart" class="filter-btn" style="margin-right: 1rem;">Clear Cart</button>
+                                <a href="payment.html" class="add-btn" id="checkout-btn" style="text-decoration: none;">Checkout</a>
                             </div>
                         </div>
                     </div>
@@ -92,15 +92,15 @@
 
     cart.forEach((item, index) => {
       const row = document.createElement("div");
-      row.className = "flex-between-center mb-1"; // Applied class
-      // row.style.display = "flex"; // Replaced by class
-      // row.style.justifyContent = "space-between"; // Replaced by class
-      // row.style.marginBottom = "1rem"; // Replaced by class
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.marginBottom = "1rem";
 
       row.innerHTML = `
         <div><strong>${item.name}</strong><br>KSH ${item.price}</div>
         <div>
-          <input type="number" min="1" value="${item.quantity}" id="qty-${index}" class="cart-qty-input"> </div>
+          <input type="number" min="1" value="${item.quantity}" id="qty-${index}" style="width: 60px; padding: 5px;">
+        </div>
       `;
 
       itemsList.appendChild(row);

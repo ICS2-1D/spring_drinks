@@ -1,10 +1,8 @@
 package com.ics.models;
 
-
-
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,14 +10,11 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@RequiredArgsConstructor
-@Table(name = "admins")
 public class Admin implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
     @Serial
     private static final long serialVersionUID = 1L;
+    @Id
+    private long id;
     private String username;
     private String password;
     private LocalDateTime last_Login;

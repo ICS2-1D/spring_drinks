@@ -1,6 +1,7 @@
 package com.ics.spring_drinks;
 
 import com.ics.dtos.*;
+import com.ics.models.Branch;
 import com.ics.models.OrderStatus;
 import com.ics.spring_drinks.services.OrderService;
 import com.ics.spring_drinks.services.AdminService;
@@ -8,10 +9,16 @@ import com.ics.spring_drinks.services.PaymentService;
 import com.ics.spring_drinks.services.ReportService;
 import com.ics.spring_drinks.services.DrinkService;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.lang.System.out;
 
 public class ClientHandler implements Runnable {
 
@@ -21,6 +28,7 @@ public class ClientHandler implements Runnable {
     private final AdminService adminService;
     private final PaymentService paymentService;
     private final ReportService reportService;
+
 
     public ClientHandler(Socket socket, DrinkService drinkService, OrderService orderService,
                          AdminService adminService, PaymentService paymentService, ReportService reportService) {
@@ -38,9 +46,10 @@ public class ClientHandler implements Runnable {
                 ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
                 ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream())
         ) {
+            assignBranchToClient();
             // 1. Read the request from the client
             Request request = (Request) ois.readObject();
-            System.out.println("SERVER: Received request of type: " + request.getType());
+            out.println("SERVER: Received request of type: " + request.getType());
 
             // 2. Route the request and prepare a response
             Response response = routeRequest(request);
@@ -54,12 +63,39 @@ public class ClientHandler implements Runnable {
             e.printStackTrace();
         } finally {
             try {
-                clientSocket.close(); // Always close the socket
+                Branch removed = branchAssignments.remove(clientSocket.getInetAddress().getHostAddress());
+                assignedBranches.remove(removed);
+                clientSocket.close();
             } catch (Exception e) {
                 System.err.println("SERVER: Error closing client socket: " + e.getMessage());
             }
         }
     }
+    private Map<String, Branch> branchAssignments = new ConcurrentHashMap<>();
+    private Set<Branch> assignedBranches = ConcurrentHashMap.newKeySet();
+
+    private Branch assignNextAvailableBranch() {
+        // Get all branches from service
+        List<Branch> allBranches = List.of(Branch.values());
+
+        // Find first unassigned branch
+        return allBranches.stream()
+                .filter(branch -> !assignedBranches.contains(branch))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private void assignBranchToClient() throws IOException {
+        Branch assignedBranch = assignNextAvailableBranch();
+        if (assignedBranch == null) {
+            throw new IOException("No available branches to assign");
+        }
+
+        branchAssignments.put(clientSocket.getInetAddress().getHostAddress(), assignedBranch);
+        assignedBranches.add(assignedBranch);
+        out.println("SERVER: Assigned branch " + assignedBranch.name() + " to client " + clientSocket.getInetAddress());
+    }
+
 
     /**
      * Routes the request to the appropriate service method based on its type.

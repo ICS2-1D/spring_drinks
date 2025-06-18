@@ -1,5 +1,6 @@
 package com.ics.spring_drinks;
 
+import com.ics.models.Branch;
 import com.ics.spring_drinks.services.DrinkService;
 import com.ics.spring_drinks.services.OrderService;
 import com.ics.spring_drinks.services.AdminService;
@@ -12,6 +13,10 @@ import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -22,6 +27,9 @@ public class TcpServerService {
     private ServerSocket serverSocket;
     private ExecutorService executorService = Executors.newCachedThreadPool();
     private volatile boolean isRunning = true;
+    private final Map<Socket, Branch> branchAssignments = new HashMap<>();
+    private final Set<Branch> assignedBranches = new HashSet<>();
+
 
     // Inject all the services that ClientHandler will need
     private final DrinkService drinkService;

@@ -32,118 +32,119 @@
 
     <main class="main-content">
         <div class="container">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+            <div class="grid-layout-payment">
                 
-                <!-- Order Summary -->
-                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
-                    <h2 style="color: #333; margin-bottom: 1.5rem;">Order Summary</h2>
+                <div class="panel p-2">
+                    <h2 class="color-dark mb-1_5">Order Summary</h2>
                     <div id="order-items"></div>
-                    <hr style="margin: 1.5rem 0; border: none; border-top: 2px solid #f0f0f0;">
-                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: #667eea;">
+                    <hr class="hr-custom">
+                    <div class="flex-between-center font-size-lg font-bold color-primary">
                         <span>Total:</span>
                         <span>KSH <span id="order-total">0</span></span>
                     </div>
                 </div>
 
-                <!-- Payment Form -->
-                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
-                    <h2 style="color: #333; margin-bottom: 1.5rem;">Payment & Delivery</h2>
+                <div class="panel-form">
+                    <h2 class="color-dark mb-1_5">Payment & Delivery</h2>
                     
                     <form id="payment-form">
-                        <!-- Personal Information -->
-                        <div style="margin-bottom: 2rem;">
-                            <h3 style="color: #667eea; margin-bottom: 1rem;">Personal Information</h3>
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Full Name *</label>
-                                <input type="text" id="full-name" required style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                        <div class="mb-2">
+                            <h3 class="payment-section-title">Customer Details</h3>
+                            <div class="form-group">
+                                <label class="form-group-label">Full Name (Customer Name) *</label>
+                                <input type="text" id="full-name" name="customer_name" required class="form-control">
                             </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Phone Number *</label>
-                                <input type="tel" id="phone" required style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" placeholder="+254 700 000 000">
+                            <div class="form-group">
+                                <label class="form-group-label">Phone Number (Customer Number) *</label>
+                                <input type="tel" id="phone" name="customer_phone_number" required class="form-control" placeholder="+254 7XX XXX XXX">
                             </div>
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Email</label>
-                                <input type="email" id="email" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                            <div class="form-group">
+                                <label class="form-group-label">Email</label>
+                                <input type="email" id="email" name="customer_email" class="form-control">
                             </div>
                         </div>
 
-                        <!-- Delivery Address -->
-                        <div style="margin-bottom: 2rem;">
-                            <h3 style="color: #667eea; margin-bottom: 1rem;">Delivery Address</h3>
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Street Address *</label>
-                                <input type="text" id="address" required style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                        <div class="mb-2">
+                            <h3 class="payment-section-title">Delivery Address</h3>
+                            <div class="form-group">
+                                <label class="form-group-label">Street Address *</label>
+                                <input type="text" id="address" name="delivery_address" required class="form-control">
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="grid-2-col form-group">
                                 <div>
-                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">City *</label>
-                                    <input type="text" id="city" required style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" value="Nairobi">
+                                    <label class="form-group-label">City *</label>
+                                    <input type="text" id="city" name="delivery_city" required class="form-control" value="Nairobi">
                                 </div>
                                 <div>
-                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Postal Code</label>
-                                    <input type="text" id="postal-code" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;">
+                                    <label class="form-group-label">Postal Code</label>
+                                    <input type="text" id="postal-code" name="delivery_postal_code" class="form-control">
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label class="form-group-label">Branch *</label>
+                                <select id="branch" name="branch" required class="form-control">
+                                    <option value="">Select Branch</option>
+                                    <option value="Main_Branch">Nairobi (Main) Branch</option>
+                                    <option value="Kisumu_Branch">Kisumu Branch</option>
+                                    <option value="Nakuru_Branch">Nakuru Branch</option>
+                                    <option value="Mombasa_Branch">Mombasa Branch</option>
+                                    </select>
+                            </div>
                         </div>
 
-                        <!-- Payment Method -->
-                        <div style="margin-bottom: 2rem;">
-                            <h3 style="color: #667eea; margin-bottom: 1rem;">Payment Method</h3>
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
-                                    <input type="radio" name="payment-method" value="mpesa" checked style="margin-right: 0.5rem;">
-                                    <span style="font-weight: bold;">M-Pesa</span>
+                        <div class="mb-2">
+                            <h3 class="payment-section-title">Payment Method</h3>
+                            <div class="form-group">
+                                <label class="flex-align-center mb-0_5 cursor-pointer">
+                                    <input type="radio" name="payment_method" value="M-PESA" checked class="form-control-radio">
+                                    <span class="font-bold">M-Pesa</span>
                                 </label>
-                                <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
-                                    <input type="radio" name="payment-method" value="card" style="margin-right: 0.5rem;">
-                                    <span style="font-weight: bold;">Credit/Debit Card</span>
+                                <label class="flex-align-center mb-0_5 cursor-pointer">
+                                    <input type="radio" name="payment_method" value="CARD" class="form-control-radio">
+                                    <span class="font-bold">Credit/Debit Card</span>
                                 </label>
-                                <label style="display: flex; align-items: center; margin-bottom: 0.5rem; cursor: pointer;">
-                                    <input type="radio" name="payment-method" value="cash" style="margin-right: 0.5rem;">
-                                    <span style="font-weight: bold;">Cash on Delivery</span>
+                                <label class="flex-align-center mb-0_5 cursor-pointer">
+                                    <input type="radio" name="payment_method" value="CASH_ON_DELIVERY" class="form-control-radio">
+                                    <span class="font-bold">Cash on Delivery</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- M-Pesa Details -->
-                        <div id="mpesa-details" style="margin-bottom: 2rem;">
-                            <h4 style="color: #333; margin-bottom: 1rem;">M-Pesa Payment</h4>
-                            <p style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                        <div id="mpesa-details" class="mb-2">
+                            <h4 class="payment-sub-section-title">M-Pesa Payment</h4>
+                            <p class="payment-info-box">
                                 You will receive an M-Pesa prompt on your phone number to complete the payment.
                             </p>
                         </div>
 
-                        <!-- Card Details -->
-                        <div id="card-details" style="display: none; margin-bottom: 2rem;">
-                            <h4 style="color: #333; margin-bottom: 1rem;">Card Details</h4>
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Card Number</label>
-                                <input type="text" id="card-number" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" placeholder="1234 5678 9012 3456">
+                        <div id="card-details" class="mb-2" style="display: none;">
+                            <h4 class="payment-sub-section-title">Card Details</h4>
+                            <div class="form-group">
+                                <label class="form-group-label">Card Number</label>
+                                <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456">
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="grid-2-col">
                                 <div>
-                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Expiry Date</label>
-                                    <input type="text" id="expiry" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" placeholder="MM/YY">
+                                    <label class="form-group-label">Expiry Date</label>
+                                    <input type="text" id="expiry" class="form-control" placeholder="MM/YY">
                                 </div>
                                 <div>
-                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">CVV</label>
-                                    <input type="text" id="cvv" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem;" placeholder="123">
+                                    <label class="form-group-label">CVV</label>
+                                    <input type="text" id="cvv" class="form-control" placeholder="123">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Special Instructions -->
-                        <div style="margin-bottom: 2rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Special Instructions (Optional)</label>
-                            <textarea id="instructions" rows="3" style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem; resize: vertical;" placeholder="Any special delivery instructions..."></textarea>
+                        <div class="mb-2">
+                            <label class="form-group-label">Special Instructions (Optional)</label>
+                            <textarea id="instructions" name="special_instructions" rows="3" class="form-control form-textarea" placeholder="Any special delivery instructions..."></textarea>
                         </div>
 
-                        <!-- Order Button -->
-                        <button type="submit" class="add-btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                        <button type="submit" class="add-btn payment-submit-btn">
                             Complete Order
                         </button>
                     </form>
-                    <div id="thank-you-message" style="display: none; margin-top: 1.5rem; text-align: center; color: #28a745;">
+                    <div id="thank-you-message" class="thank-you-message" style="display: none;">
                         <h3>Thank you for your order!</h3>
                         <p>Your order has been placed successfully. You will receive a confirmation shortly.</p>
                 </div>
@@ -197,14 +198,12 @@
       runningTotal += itemTotal;
 
       const itemElement = document.createElement('div');
-      itemElement.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0;';
+      itemElement.className = 'order-item-row'; // Applied class
+      // itemElement.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0;'; // Replaced by class
       itemElement.innerHTML = `
         <div>
-          <div style="font-weight: bold; color: #333;">${item.name}</div>
-          <div style="color: #666; font-size: 0.9rem;">KSH ${item.price.toLocaleString()} × ${item.quantity}</div>
-        </div>
-        <div style="font-weight: bold; color: #667eea;">KSH ${itemTotal.toLocaleString()}</div>
-      `;
+          <div class="order-item-name">${item.name}</div> <div class="order-item-details">KSH ${item.price.toLocaleString()} × ${item.quantity}</div> </div>
+        <div class="order-item-price">KSH ${itemTotal.toLocaleString()}</div> `;
       orderItems.appendChild(itemElement);
     });
 
@@ -213,13 +212,13 @@
   }
 
   // Handle payment method toggles
-  document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
+  document.querySelectorAll('input[name="payment_method"]').forEach(radio => { // Changed name to payment_method
     radio.addEventListener('change', function () {
       const mpesaDetails = document.getElementById('mpesa-details');
       const cardDetails = document.getElementById('card-details');
 
-      mpesaDetails.style.display = (this.value === 'mpesa') ? 'block' : 'none';
-      cardDetails.style.display = (this.value === 'card') ? 'block' : 'none';
+      mpesaDetails.style.display = (this.value === 'M-PESA') ? 'block' : 'none'; // Changed value check
+      cardDetails.style.display = (this.value === 'CARD') ? 'block' : 'none';   // Changed value check
     });
   });
 
@@ -227,19 +226,37 @@
   document.getElementById('payment-form').addEventListener('submit', function (e) {
     e.preventDefault();
 
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
     // Collect form data
     const formData = {
-      fullName: document.getElementById('full-name').value,
-      phone: document.getElementById('phone').value,
-      email: document.getElementById('email').value,
-      address: document.getElementById('address').value,
-      city: document.getElementById('city').value,
-      postalCode: document.getElementById('postal-code').value,
-      paymentMethod: document.querySelector('input[name="payment-method"]:checked').value,
-      instructions: document.getElementById('instructions').value,
-      items: cart,
-      total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      customerName: document.getElementById('full-name').value, // Matches Customer_name
+      customerPhoneNumber: document.getElementById('phone').value, // Matches Customer_number, customer_phone_number
+      customerEmail: document.getElementById('email').value, // Additional customer info
+      deliveryAddress: document.getElementById('address').value,
+      deliveryCity: document.getElementById('city').value,
+      deliveryPostalCode: document.getElementById('postal-code').value,
+      branch: document.getElementById('branch').value, // New: for orders.branch
+      paymentMethod: document.querySelector('input[name="payment_method"]:checked').value, // Matches payments.payment_method
+      
+      //For testing card details
+      cardNumber: document.getElementById('card-number') ? document.getElementById('card-number').value : null,
+      expiry: document.getElementById('expiry') ? document.getElementById('expiry').value : null,
+      cvv: document.getElementById('cvv') ? document.getElementById('cvv').value : null,
+
+      //continue with the rest of the form data
+      specialInstructions: document.getElementById('instructions').value,
+      orderItems: cart.map(item => ({ // For order_items table
+          drink_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          total_price: item.price * item.quantity // Calculated total for each item
+      })),
+      totalAmount: cart.reduce((sum, item) => sum + item.price * item.quantity, 0) // Matches orders.total_amount
     };
+
+    // Log formData (this is where you'd send it to a backend)
+    console.log("Order Data to be sent to Backend:", formData);
 
     // Disable submit button
     const submitBtn = this.querySelector('button[type="submit"]');
@@ -249,9 +266,46 @@
     //Thank you message
     document.getElementById('thank-you-message').style.display = 'block';
 
+
+    //Sending data to backend
+    fetch('http://localhost:8080/api/orders', { // Adjust URL if your Spring Boot app runs on a different port
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+  })
+  .then(response => {
+      // Check if the response is OK (2xx status code)
+      if (response.ok) {
+          return response.text(); // Or .json() if your backend returns JSON
+      } else {
+          // If not OK, parse the error message from the backend
+          return response.text().then(errorText => { // Assuming backend sends plain text error messages
+              throw new Error(`Order failed: ${response.status} - ${errorText}`);
+          });
+      }
+  })
+  .then(data => {
+      // Success
+      console.log('Order successful:', data);
+      alert(`Order placed successfully! 🎉\n\nOrder Total: KSH ${formData.totalAmount.toLocaleString()}\nDelivery Address: ${formData.deliveryAddress}, ${formData.deliveryCity}\nPayment Method: ${formData.paymentMethod.toUpperCase()}\n\nYou will receive a confirmation message shortly.`);
+      localStorage.removeItem('cart');
+      localStorage.removeItem('cartTotal');
+      window.location.href = 'Drinks.html';
+  })
+  .catch(error => {
+      // Error handling
+      console.error('There was an error placing the order:', error);
+      alert(`Error placing order: ${error.message}. Please try again.`);
+      submitBtn.textContent = 'Place Order';
+      submitBtn.disabled = false;
+      document.getElementById('thank-you-message').style.display = 'none'; // Hide thank you on error
+  });
+
     // Simulate order processing
     setTimeout(() => {
-      alert(`Order placed successfully! 🎉\n\nOrder Total: KSH ${formData.total.toLocaleString()}\nDelivery Address: ${formData.address}, ${formData.city}\nPayment Method: ${formData.paymentMethod.toUpperCase()}\n\nYou will receive a confirmation message shortly.`);
+      alert(`Order placed successfully! 🎉\n\nOrder Total: KSH ${formData.totalAmount.toLocaleString()}\nDelivery Address: ${formData.deliveryAddress}, ${formData.deliveryCity}\nPayment Method: ${formData.paymentMethod}\n\nYou will receive a confirmation message shortly.`);
       localStorage.removeItem('cart');
       localStorage.removeItem('cartTotal');
       window.location.href = 'Drinks.html';

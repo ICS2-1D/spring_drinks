@@ -30,9 +30,9 @@
             <p>A sip that's a toast to the future</p>
             <div class="store-info-desktop">
                 <div class="store-badge">
-                    <span class="store-name">SipForYou</span>
-                    <span class="deliver-info">🚚 Delivery in 20 minutes</span>
-                    <span class="save-offer">💰 Save on Select Items</span>
+                    <span class="store-name">Spring Drinks</span>
+                    <span class="deliver-info">🚚 Delivery in 20 minutes!</span>
+                    <span class="save-offer">💰 Affordable prices!</span>
                 </div>
             </div>
         </div>
@@ -50,10 +50,8 @@
                     <button class="filter-btn" data-filter="alcohol">Alcohol</button>
                 </div>
 
-                <!--Drinks grid-->
                 <div class="drinks-selection" >
                     
-                    <!-- WINE SECTION -->
                     <div class="drink-item" data-category="wine">
                         <div class="product-image red-wine">
                             <div class="bottle-shape">
@@ -141,7 +139,6 @@
                         </div>
                     </div>
 
-                    <!-- SODA SECTION -->
                     <div class="drink-item" data-category="soda">
                         <div class="product-image soda-cola">
                             <div class="can-shape">
@@ -226,7 +223,6 @@
                         </div>
                     </div>
 
-                    <!-- ALCOHOL SECTION -->
                     <div class="drink-item" data-category="alcohol">
                         <div class="product-image beer-bottle">
                             <div class="bottle-shape">
@@ -294,7 +290,7 @@
                             <h3 class="product-name">Captain Morgan</h3>
                             <p class="product-description">Spiced rum with rich flavor</p>
                             <div class="product-price">KSH 1,600</div>
-                            <button class="add-btn" onclick="addToCart('Fanta', 70)">Add to Cart</button>
+                            <button class="add-btn" onclick="addToCart('Captain Morgan', 1600)">Add to Cart</button>
                         </div>
                     </div>
 
@@ -366,6 +362,7 @@
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {
+                // For a real database, you'd also want a drink_id here
                 cart.push({
                     name: productName,
                     price: productPrice,
@@ -376,7 +373,7 @@
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartCount();
 
-            // Feedback animation
+            // Feedback animation (These are dynamic and should remain in JS)
             this.textContent = 'Added!';
             this.style.background = '#4CAF50';
             this.style.color = 'white';

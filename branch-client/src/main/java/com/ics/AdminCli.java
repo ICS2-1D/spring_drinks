@@ -1,18 +1,11 @@
 package com.ics;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.ics.dtos.DrinkDto;
 import com.ics.dtos.RegisterRequest;
-import com.ics.dtos.SalesReportDto; // You will need to create this DTO
+import com.ics.dtos.SalesReportDto;
+import com.ics.dtos.Request;
+import com.ics.dtos.Response;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,19 +13,23 @@ import java.util.Scanner;
 
 public class AdminCli {
 
-    // Base URL for the backend API
-    private static final String API_BASE_URL = "http://localhost:8080";
-    private static final String ADMIN_API_URL = API_BASE_URL + "/admin";
+    // Socket client for communication with HQ server
+    private static final SocketClient socketClient = new SocketClient("localhost", 9999);
 
+    // Request type constants
+    private static final String LOGIN_ADMIN = "LOGIN_ADMIN";
+    private static final String REGISTER_ADMIN = "REGISTER_ADMIN";
+    private static final String GET_ALL_DRINKS = "GET_ALL_DRINKS";
+    private static final String UPDATE_DRINK = "UPDATE_DRINK";
+    private static final String GET_SALES_REPORT = "GET_SALES_REPORT";
+    private static final String SYNC_TO_HQ = "SYNC_TO_HQ";
 
     // Re-usable components
-    private static final HttpClient client = HttpClient.newHttpClient();
-    private static final Gson gson = new Gson();
     private static final Scanner scanner = new Scanner(System.in);
     private static boolean isLoggedIn = false;
     private static String authToken = "";
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         System.out.println("🍹====================================🍹");
         System.out.println("  ADMINISTRATOR COMMAND LINE INTERFACE");
         System.out.println("🍹====================================🍹");
@@ -46,7 +43,7 @@ public class AdminCli {
         }
     }
 
-    private static void showAuthMenu() throws IOException, InterruptedException {
+    private static void showAuthMenu() {
         System.out.println("\n--- Authentication ---");
         System.out.println("1. 🔐 Login");
         System.out.println("2. 📝 Signup");
@@ -72,7 +69,7 @@ public class AdminCli {
         }
     }
 
-    private static void showMainMenu() throws IOException, InterruptedException {
+    private static void showMainMenu() {
         System.out.println("\n--- Main Menu ---");
         System.out.println("1. 📦 View Stock");
         System.out.println("2. 💰 Update Drink Prices");
@@ -92,7 +89,8 @@ public class AdminCli {
                 updateDrinkDetails();
                 break;
             case "3":
-//                setBranchInfo();
+                // setBranchInfo(); // TODO: Implement later
+                System.out.println("🚧 Feature coming soon!");
                 break;
             case "4":
                 viewSalesReport();
@@ -108,7 +106,7 @@ public class AdminCli {
         }
     }
 
-    private static void login() throws IOException, InterruptedException {
+    private static void login() {
         System.out.println("\n--- 🔐 Admin Login ---");
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
@@ -116,26 +114,19 @@ public class AdminCli {
         String password = scanner.nextLine();
 
         RegisterRequest loginRequest = new RegisterRequest(username, password);
-        String requestBody = gson.toJson(loginRequest);
+        Request serviceRequest = new Request(LOGIN_ADMIN, loginRequest);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ADMIN_API_URL + "/login"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
             isLoggedIn = true;
-            authToken = response.body(); // Assuming the token is returned in the body
+            authToken = (String) serviceResponse.getData(); // Assuming token is returned in data
             System.out.println("✅ Login successful! Welcome, " + username + ".");
         } else {
-            System.out.println("❌ Login failed. Please check your credentials.");
+            System.out.println("❌ Login failed: " + serviceResponse.getMessage());
         }
     }
 
-    private static void signup() throws IOException, InterruptedException {
+    private static void signup() {
         System.out.println("\n--- 📝 Admin Signup ---");
         System.out.print("Enter new username: ");
         String username = scanner.nextLine();
@@ -143,20 +134,13 @@ public class AdminCli {
         String password = scanner.nextLine();
 
         RegisterRequest signupRequest = new RegisterRequest(username, password);
-        String requestBody = gson.toJson(signupRequest);
+        Request serviceRequest = new Request(REGISTER_ADMIN, signupRequest);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ADMIN_API_URL + "/register"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
             System.out.println("✅ Signup successful! Please log in.");
         } else {
-            System.out.println("❌ Signup failed: " + response.body());
+            System.out.println("❌ Signup failed: " + serviceResponse.getMessage());
         }
     }
 
@@ -166,21 +150,15 @@ public class AdminCli {
         System.out.println("\n✅ You have been logged out.");
     }
 
-
-    private static void viewStock() throws IOException, InterruptedException {
+    private static void viewStock() {
         System.out.println("\n--- 📦 Current Drink Stock ---");
-        // This can use the same public /drinks endpoint as the client
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(API_BASE_URL + "/drinks"))
-                .GET()
-                .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        Request serviceRequest = new Request(GET_ALL_DRINKS, null);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
 
-        if (response.statusCode() == 200) {
-            Type drinkListType = new TypeToken<ArrayList<DrinkDto>>() {
-            }.getType();
-            List<DrinkDto> drinks = gson.fromJson(response.body(), drinkListType);
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
+            @SuppressWarnings("unchecked")
+            List<DrinkDto> drinks = (List<DrinkDto>) serviceResponse.getData();
 
             System.out.println("----------------------------------------");
             System.out.printf("%-20s | %-10s%n", "Drink Name", "Quantity");
@@ -190,11 +168,11 @@ public class AdminCli {
             }
             System.out.println("----------------------------------------");
         } else {
-            System.out.println("❌ Failed to fetch stock.");
+            System.out.println("❌ Failed to fetch stock: " + serviceResponse.getMessage());
         }
     }
 
-    private static void updateDrinkDetails() throws IOException, InterruptedException {
+    private static void updateDrinkDetails() {
         System.out.println("\n--- 💰 Update Drink Prices & Quantities ---");
 
         // First, fetch and display drinks so admin can choose one
@@ -203,6 +181,7 @@ public class AdminCli {
             System.out.println("No drinks found to update.");
             return;
         }
+
         System.out.println("--- Available Drinks ---");
         System.out.printf("%-5s %-20s %-10s %-10s%n", "ID", "Name", "Price", "Quantity");
         System.out.println("-----------------------------------------------------");
@@ -230,7 +209,9 @@ public class AdminCli {
             return;
         }
 
-        Map<String, Object> payload = new HashMap<>();
+        Map<String, Object> updateData = new HashMap<>();
+        updateData.put("drinkId", drinkId);
+        updateData.put("authToken", authToken);
 
         // Only add fields that user wants to update
         if (!newPrice.isEmpty()) {
@@ -240,7 +221,7 @@ public class AdminCli {
                     System.out.println("❌ Price must be greater than 0");
                     return;
                 }
-                payload.put("drinkPrice", price);
+                updateData.put("drinkPrice", price);
             } catch (NumberFormatException e) {
                 System.out.println("❌ Invalid price format");
                 return;
@@ -254,60 +235,46 @@ public class AdminCli {
                     System.out.println("❌ Quantity cannot be negative");
                     return;
                 }
-                payload.put("drinkQuantity", quantity);
+                updateData.put("drinkQuantity", quantity);
             } catch (NumberFormatException e) {
                 System.out.println("❌ Invalid quantity format");
                 return;
             }
         }
 
-        String requestBody = gson.toJson(payload);
+        Request serviceRequest = new Request(UPDATE_DRINK, updateData);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
 
-        // API call to update drink. Use the existing endpoint
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ADMIN_API_URL + "/drinks/" + drinkId + "/price"))
-                .header("Authorization", "Bearer " + authToken)
-                .header("Content-Type", "application/json")
-                .PUT(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
             System.out.println("✅ Drink updated successfully!");
         } else {
-            System.out.println("❌ Failed to update drink: " + response.body());
+            System.out.println("❌ Failed to update drink: " + serviceResponse.getMessage());
         }
     }
 
-    private static List<DrinkDto> getDrinksMenu() throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(API_BASE_URL + "/drinks"))
-                .GET()
-                .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() == 200) {
-            Type drinkListType = new TypeToken<ArrayList<DrinkDto>>() {
-            }.getType();
-            return gson.fromJson(response.body(), drinkListType);
+    private static List<DrinkDto> getDrinksMenu() {
+        Request serviceRequest = new Request(GET_ALL_DRINKS, null);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
+
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
+            @SuppressWarnings("unchecked")
+            List<DrinkDto> drinks = (List<DrinkDto>) serviceResponse.getData();
+            return drinks;
         }
         return null;
     }
 
-
-    private static void viewSalesReport() throws IOException, InterruptedException {
+    private static void viewSalesReport() {
         System.out.println("\n--- 📊 Sales Report ---");
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ADMIN_API_URL + "/sales/report"))
-                .header("Authorization", "Bearer " + authToken)
-                .GET()
-                .build();
+        Map<String, Object> reportRequest = new HashMap<>();
+        reportRequest.put("authToken", authToken);
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        Request serviceRequest = new Request(GET_SALES_REPORT, reportRequest);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
 
-        if (response.statusCode() == 200) {
-            SalesReportDto report = gson.fromJson(response.body(), SalesReportDto.class);
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
+            SalesReportDto report = (SalesReportDto) serviceResponse.getData();
 
             System.out.println("=================================================");
             System.out.println("           SALES REPORT - " + java.time.LocalDate.now());
@@ -335,49 +302,25 @@ public class AdminCli {
             }
             System.out.println("=================================================");
         } else {
-            System.out.println("❌ Failed to generate sales report: " + response.body());
+            System.out.println("❌ Failed to generate sales report: " + serviceResponse.getMessage());
         }
     }
 
-    private static void syncToHq() throws IOException, InterruptedException {
+    private static void syncToHq() {
         System.out.println("\n--- ☁️ Sync to HQ ---");
-
-        // 1. Fetch the sales report data first
-        HttpRequest reportRequest = HttpRequest.newBuilder()
-                .uri(URI.create(ADMIN_API_URL + "/sales/report"))
-                .GET()
-                .build();
-        HttpResponse<String> reportResponse = client.send(reportRequest, HttpResponse.BodyHandlers.ofString());
-
-        if (reportResponse.statusCode() != 200) {
-            System.out.println("❌ Could not fetch sales report to sync.");
-            return;
-        }
-
-        // 2. Serialize the report data (it's already a JSON string)
-        String reportJson = reportResponse.body();
-
         System.out.println("Syncing local data to central server...");
-        System.out.println("Serialized Payload: " + reportJson);
 
-        // 3. Send it to the HQ server
-        // This requires another API endpoint on a different server (the HQ server)
-        // For now, we just simulate this.
-        /*
-            // Example of what the actual request would look like:
-            HttpRequest hqSyncRequest = HttpRequest.newBuilder()
-                .uri(URI.create("http://hq-server-api.com/sync")) // The HQ server URL
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(reportJson))
-                .build();
-            HttpResponse<String> hqResponse = client.send(hqSyncRequest, HttpResponse.BodyHandlers.ofString());
-            if (hqResponse.statusCode() == 200) {
-                 System.out.println("✅ Data successfully synced to HQ!");
-            } else {
-                System.out.println("❌ HQ sync failed: " + hqResponse.body());
-            }
-        */
-        Thread.sleep(1500);
-        System.out.println("✅ Data successfully synced to HQ!");
+        Map<String, Object> syncData = new HashMap<>();
+        syncData.put("authToken", authToken);
+        syncData.put("branchId", "NAIROBI"); // Could be made configurable
+
+        Request serviceRequest = new Request(SYNC_TO_HQ, syncData);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
+
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
+            System.out.println("✅ Data successfully synced to HQ!");
+        } else {
+            System.out.println("❌ HQ sync failed: " + serviceResponse.getMessage());
+        }
     }
 }

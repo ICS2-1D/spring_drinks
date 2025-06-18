@@ -1,39 +1,35 @@
 package com.ics;
 
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.ics.dtos.DrinkDto;
 import com.ics.dtos.OrderItemRequest;
 import com.ics.dtos.OrderRequest;
 import com.ics.dtos.OrderResponse;
+import com.ics.dtos.Request;
+import com.ics.dtos.Response;
 import com.ics.models.Branch;
 import com.ics.models.Customer;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-
 public class ClientCli {
 
-    // base URL for the backend API
-    private static final String API_BASE_URL = "http://localhost:8080";
+    // Socket client for communication with HQ server
+    private static final SocketClient socketClient = new SocketClient("localhost", 9999);
 
-    // Re-usable components for making HTTP requests and parsing JSON
-    private static final HttpClient client = HttpClient.newHttpClient();
-    private static final Gson gson = new Gson();
+    // Request type constants
+    private static final String GET_ALL_DRINKS = "GET_ALL_DRINKS";
+    private static final String CREATE_ORDER = "CREATE_ORDER";
+    private static final String UPDATE_ORDER_STATUS = "UPDATE_ORDER_STATUS";
+    private static final String CREATE_PAYMENT = "CREATE_PAYMENT";
+
+    // Re-usable components
     private static final Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         System.out.println("🍹====================================🍹");
         System.out.println("      WELCOME TO SPRING DRINKS!");
         System.out.println("🍹====================================🍹");
@@ -51,7 +47,7 @@ public class ClientCli {
         }
     }
 
-    private static void runClientCli() throws IOException, InterruptedException {
+    private static void runClientCli() {
         // 1. Welcome the user and register them in the system.
         Customer customer = welcomeCustomer();
 
@@ -79,7 +75,6 @@ public class ClientCli {
         System.out.println("\nThank you for visiting! Have a great day! 🎉");
     }
 
-
     private static Customer welcomeCustomer() {
         System.out.print("👋 What's your name? ");
         String name = scanner.nextLine();
@@ -92,7 +87,7 @@ public class ClientCli {
         return customer;
     }
 
-    private static void placeOrder(Customer customer) throws IOException, InterruptedException {
+    private static void placeOrder(Customer customer) {
         // Get the list of available drinks from the API
         List<DrinkDto> availableDrinks = getDrinksMenu();
         if (availableDrinks == null || availableDrinks.isEmpty()) {
@@ -110,7 +105,6 @@ public class ClientCli {
             drinksMap.put(drink.getId(), drink);
         }
         System.out.println("---------------------------------------");
-
 
         // Let user add items to their cart
         Map<Long, OrderItemRequest> cart = new HashMap<>();
@@ -154,23 +148,21 @@ public class ClientCli {
         checkout(customer, new ArrayList<>(cart.values()), drinksMap);
     }
 
+    private static List<DrinkDto> getDrinksMenu() {
+        Request serviceRequest = new Request(GET_ALL_DRINKS, null);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
 
-    private static List<DrinkDto> getDrinksMenu() throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(API_BASE_URL + "/drinks"))
-                .GET()
-                .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() == 200) {
-            Type drinkListType = new TypeToken<ArrayList<DrinkDto>>() {
-            }.getType();
-            return gson.fromJson(response.body(), drinkListType);
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
+            @SuppressWarnings("unchecked")
+            List<DrinkDto> drinks = (List<DrinkDto>) serviceResponse.getData();
+            return drinks;
+        } else {
+            System.out.println("❌ Failed to fetch drinks menu: " + serviceResponse.getMessage());
+            return null;
         }
-        return null;
     }
 
-
-    private static void checkout(Customer customer, List<OrderItemRequest> items, Map<Long, DrinkDto> drinksMap) throws IOException, InterruptedException {
+    private static void checkout(Customer customer, List<OrderItemRequest> items, Map<Long, DrinkDto> drinksMap) {
         System.out.println("\n--- 🛒 YOUR ORDER SUMMARY ---");
         double total = 0;
         System.out.printf("%-20s %-10s %-10s %-10s%n", "Drink", "Quantity", "Unit Price", "Subtotal");
@@ -198,63 +190,57 @@ public class ClientCli {
         orderRequest.setBranch(Branch.NAIROBI);
         orderRequest.setItems(items);
 
+        Request serviceRequest = new Request(CREATE_ORDER, orderRequest);
+        Response serviceResponse = socketClient.sendRequest(serviceRequest);
 
-        String requestBody = gson.toJson(orderRequest);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(API_BASE_URL + "/order"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 201) { // 201 Created
-            OrderResponse orderResponse = gson.fromJson(response.body(), OrderResponse.class);
+        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
+            OrderResponse orderResponse = (OrderResponse) serviceResponse.getData();
             System.out.println("\n🎉 ORDER PLACED SUCCESSFULLY! Order Number: " + orderResponse.getOrderNumber());
             simulatePayment(orderResponse.getOrderId(), customer.getCustomer_phone_number());
         } else {
-            System.out.println("❌ Failed to place order: " + response.body());
+            System.out.println("❌ Failed to place order: " + serviceResponse.getMessage());
         }
     }
 
-
-    private static void simulatePayment(Long orderId, String phoneNumber) throws IOException, InterruptedException {
+    private static void simulatePayment(Long orderId, String phoneNumber) {
         System.out.println("\n--- 💳 SIMULATING PAYMENT ---");
-        Thread.sleep(1000);
-        System.out.println("Processing with phone number...");
-        Thread.sleep(1500);
-        System.out.println("✅ Payment Approved!");
+        try {
+            Thread.sleep(1000);
+            System.out.println("Processing with phone number...");
+            Thread.sleep(1500);
+            System.out.println("✅ Payment Approved!");
 
-        // Update order status
-        HttpRequest statusUpdate = HttpRequest.newBuilder()
-                .uri(URI.create(API_BASE_URL + "/order/status/" + orderId + "?orderStatus=COMPLETED"))
-                .PUT(HttpRequest.BodyPublishers.noBody())
-                .build();
+            // Update order status
+            Map<String, Object> statusUpdate = new HashMap<>();
+            statusUpdate.put("orderId", orderId);
+            statusUpdate.put("orderStatus", "COMPLETED");
 
-        client.send(statusUpdate, HttpResponse.BodyHandlers.ofString());
+            Request statusRequest = new Request(UPDATE_ORDER_STATUS, statusUpdate);
+            Response statusResponse = socketClient.sendRequest(statusRequest);
 
-        // Now simulate the payment record
-        Map<String, Object> paymentData = new HashMap<>();
-        paymentData.put("orderId", orderId);
-        paymentData.put("customerNumber", phoneNumber);
-        paymentData.put("paymentMethod", "M-PESA");
-        paymentData.put("paymentStatus", "SUCCESS");
+            if (statusResponse.getStatus() != Response.Status.SUCCESS) {
+                System.out.println("⚠️ Warning: Could not update order status");
+            }
 
-        String json = gson.toJson(paymentData);
+            // Now simulate the payment record
+            Map<String, Object> paymentData = new HashMap<>();
+            paymentData.put("orderId", orderId);
+            paymentData.put("customerNumber", phoneNumber);
+            paymentData.put("paymentMethod", "M-PESA");
+            paymentData.put("paymentStatus", "SUCCESS");
 
-        HttpRequest paymentRequest = HttpRequest.newBuilder()
-                .uri(URI.create(API_BASE_URL + "/payments"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+            Request paymentRequest = new Request(CREATE_PAYMENT, paymentData);
+            Response paymentResponse = socketClient.sendRequest(paymentRequest);
 
-        HttpResponse<String> response = client.send(paymentRequest, HttpResponse.BodyHandlers.ofString());
+            if (paymentResponse.getStatus() == Response.Status.SUCCESS) {
+                System.out.println("✅ Payment recorded successfully!");
+            } else {
+                System.out.println("❌ Failed to record payment: " + paymentResponse.getMessage());
+            }
 
-        if (response.statusCode() == 201) {
-            System.out.println("✅ Payment recorded successfully!");
-        } else {
-            System.out.println("❌ Failed to record payment: " + response.body());
+        } catch (InterruptedException e) {
+            System.out.println("Payment simulation interrupted");
+            Thread.currentThread().interrupt();
         }
     }
 }

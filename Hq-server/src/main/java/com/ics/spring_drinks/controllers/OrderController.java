@@ -24,21 +24,18 @@ import java.util.stream.Collectors;
 public class OrderController {
 
     private final OrderService orderService;
-
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest) {
-
-        try{
-            Order order = orderService.createOrder(orderRequest);
-            OrderResponse orderResponse = convertToOrderResponse(order);
-
+        try {
+            OrderResponse orderResponse = orderService.createOrder(orderRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(orderResponse);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the order.");
         }
     }
+
 
 
     private OrderResponse convertToOrderResponse(Order order) {

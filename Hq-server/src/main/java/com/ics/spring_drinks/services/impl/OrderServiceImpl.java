@@ -1,6 +1,8 @@
 package com.ics.spring_drinks.services.impl;
 
+import com.ics.dtos.OrderItemResponse;
 import com.ics.dtos.OrderRequest;
+import com.ics.dtos.OrderResponse;
 import com.ics.models.*;
 import com.ics.spring_drinks.repository.DrinkRepository;
 import com.ics.spring_drinks.repository.OrderItemRepository;
@@ -25,7 +27,8 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Order createOrder(OrderRequest request) {
+    @Transactional
+    public OrderResponse createOrder(OrderRequest request) {
         Order order = new Order();
         Customer customer = new Customer();
         customer.setCustomer_name(request.getCustomerName());
@@ -74,8 +77,34 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(totalAmount);
 
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        return mapToOrderResponse(savedOrder);
+
     }
+    private OrderResponse mapToOrderResponse(Order order) {
+        OrderResponse response = new OrderResponse();
+        response.setOrderId(order.getOrderId());
+        response.setOrderNumber(order.getOrderNumber());
+        response.setCustomerName(order.getCustomer().getCustomer_name());
+        response.setCustomerPhoneNumber(order.getCustomer().getCustomer_phone_number());
+        response.setOrderDate(order.getOrderDate());
+        response.setBranch(order.getBranch());
+        response.setTotalAmount(order.getTotalAmount());
+        response.setOrderStatus(order.getOrderStatus());
+        List<OrderItemResponse> itemResponses = order.getItems().stream()
+                .map(item -> new OrderItemResponse(
+                        item.getId(),
+                        item.getDrink().getDrinkName(),
+                        item.getQuantity(),
+                        item.getUnitPrice(),
+                        item.getTotalPrice()
+                ))
+                .toList();
+
+        return response;
+
+    }
+
 
     private String generateOrderNumber() {
         return "ORD-" + (int) (Math.random() * 1000);

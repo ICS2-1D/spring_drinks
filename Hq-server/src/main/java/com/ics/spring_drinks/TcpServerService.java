@@ -1,9 +1,10 @@
 package com.ics.spring_drinks;
 
-
-
 import com.ics.spring_drinks.services.DrinkService;
 import com.ics.spring_drinks.services.OrderService;
+import com.ics.spring_drinks.services.AdminService;
+import com.ics.spring_drinks.services.PaymentService;
+import com.ics.spring_drinks.services.ReportService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -25,10 +26,18 @@ public class TcpServerService {
     // Inject all the services that ClientHandler will need
     private final DrinkService drinkService;
     private final OrderService orderService;
+    private final AdminService adminService;
+    private final PaymentService paymentService;
+    private final ReportService reportService;
 
-    public TcpServerService(DrinkService drinkService, OrderService orderService) {
+    public TcpServerService(DrinkService drinkService, OrderService orderService,
+                            AdminService adminService, PaymentService paymentService,
+                            ReportService reportService) {
         this.drinkService = drinkService;
         this.orderService = orderService;
+        this.adminService = adminService;
+        this.paymentService = paymentService;
+        this.reportService = reportService;
     }
 
     @PostConstruct
@@ -45,7 +54,8 @@ public class TcpServerService {
                         System.out.println("-> New client connected: " + clientSocket.getInetAddress());
 
                         // Create a new handler for the client and execute it in the thread pool
-                        ClientHandler clientHandler = new ClientHandler(clientSocket, drinkService, orderService);
+                        ClientHandler clientHandler = new ClientHandler(clientSocket, drinkService, orderService,
+                                adminService, paymentService, reportService);
                         executorService.submit(clientHandler);
 
                     } catch (IOException e) {
@@ -76,4 +86,3 @@ public class TcpServerService {
         executorService.shutdown();
     }
 }
-

@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.ics</groupId>
-    <artifactId>distributed-drinks-system</artifactId>
+    <artifactId>hq-server</artifactId> <!-- instead of distributed-drinks-system -->
+    <name>hq-server</name> <!-- optional but good -->
     <version>0.0.1-SNAPSHOT</version>
-    <name>distributed-drinks-system</name>
     <description>A distributed drinks system in java for group project</description>
     <url/>
     <licenses>

@@ -5,13 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.ics</groupId>
-        <artifactId>OOP_PROJECT</artifactId>
+        <artifactId>spring_drinks</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
 
-    <artifactId>cli-app</artifactId>
+    <artifactId>branch-client</artifactId>
+    <name>branch-client</name>
+
 
     <dependencies>
         <!-- Optional: For calling Spring APIs -->

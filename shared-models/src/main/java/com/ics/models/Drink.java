@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 @RequiredArgsConstructor
 @Entity
+@Table(name = "drinks")
 public class Drink implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -20,5 +21,7 @@ public class Drink implements Serializable {
     private String drinkName;
     private int drinkQuantity;
     private double drinkPrice;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY,mappedBy = "drink")
+    @JsonIgnore
     private List<OrderItem> orderItems;
 }

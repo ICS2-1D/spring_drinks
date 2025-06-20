@@ -20,6 +20,6 @@ target/
 *.ipr
 
 
-branch_app/.env
+.env
 
 

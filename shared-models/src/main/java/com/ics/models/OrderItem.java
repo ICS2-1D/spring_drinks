@@ -1,38 +1,40 @@
 package com.ics.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor; // Add this
 import lombok.Data;
-import lombok.NoArgsConstructor; // Add this
-// Removed lombok.RequiredArgsConstructor as AllArgsConstructor and NoArgsConstructor cover its needs for JPA
+import lombok.RequiredArgsConstructor;
+
 import java.io.Serial;
 import java.io.Serializable;
 
 @Data
-@NoArgsConstructor // IMPORTANT: JPA requires a no-argument constructor for proxying
-@AllArgsConstructor // Useful for creating instances with all fields, though setters are also used
+@RequiredArgsConstructor
 @Entity
+@Table(name = "order_items")
 public class OrderItem implements Serializable {
  @Serial
  private static final long serialVersionUID = 1L;
+
  @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
+ // Many order items belong to one order
  @ManyToOne(fetch = FetchType.LAZY)
- @JoinColumn(name = "order_id", referencedColumnName = "order_id", nullable = false) // order_id must not be null
+ @JoinColumn(name = "order_id", referencedColumnName = "orderId")
  private Order order;
 
+ // Many order items can reference one drink
  @ManyToOne(fetch = FetchType.LAZY)
- @JoinColumn(name = "drink_id", referencedColumnName = "id", nullable = false) // drink_id must not be null
+ @JoinColumn(name = "drink_id", referencedColumnName = "id")
  private Drink drink;
 
- @Column(nullable = false) // Explicitly mark quantity as NOT NULL in DB schema
+ @Column(name = "quantity")
  private int quantity;
 
- @Column(nullable = false) // Explicitly mark unitPrice as NOT NULL in DB schema
+ @Column(name = "unit_price")
  private double unitPrice;
 
- @Column(nullable = false) // Explicitly mark totalPrice as NOT NULL in DB schema
+ @Column(name = "total_price")
  private double totalPrice;
 }

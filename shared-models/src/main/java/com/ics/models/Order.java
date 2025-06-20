@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -15,28 +14,33 @@ import java.util.List;
 @Entity
 @Table(name = "orders")
 public class Order implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="order_id")
-    private Long orderId;
-    private String orderNumber;
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> items= new ArrayList<>();
+    private long orderId;
 
+    @Column(unique = true, name = "order_number")
+    private String orderNumber;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderItem> items;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "branch")
     private Branch branch;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @Embedded
     private Customer customer;
 
-
     @Enumerated(EnumType.STRING)
+    @Column(name = "order_status")
     private OrderStatus orderStatus;
+
+    @Column(name = "order_date")
     private Timestamp orderDate;
+
+    @Column(name = "total_amount")
     private double totalAmount;
-
-
 }

@@ -2,20 +2,12 @@ package com.ics.dtos;
 
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-
-import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * A generic response object sent from the server back to the client.
  */
-@Data
-@AllArgsConstructor
 public class Response implements Serializable {
-    @Serial
     private static final long serialVersionUID = 2L;
 
     private Status status;
@@ -26,6 +18,38 @@ public class Response implements Serializable {
         SUCCESS,
         ERROR,
         UNAUTHENTICATED
+    }
+
+    // Constructors, getters, and setters
+
+    public Response(Status status, Object data, String message) {
+        this.status = status;
+        this.data = data;
+        this.message = message;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
 

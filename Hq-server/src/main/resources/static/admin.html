@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spring Drinks - Admin Panel</title>
+  <!-- Using vanilla CSS instead of Tailwind -->
+  <style>
+    body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+    header { background: linear-gradient(to right, #6b21a8, #9333ea); color: white; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem; }
+    .container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 2.25rem; font-weight: 800; }
+    #logout-btn { background-color: white; color: #6b21a8; border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 600; display: none; }
+    main { flex-grow: 1; padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    #auth-section { background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    .form-container h2 { text-align: center; font-size: 1.875rem; margin-bottom: 1.5rem; }
+    .form-container form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-container label { font-weight: 600; }
+    .form-container input { padding: 0.75rem; border: 1px solid #ccc; border-radius: 0.5rem; }
+    .form-container button[type="submit"] { background-color: #7c3aed; color: white; padding: 0.75rem; border: none; border-radius: 0.5rem; font-size: 1rem; cursor: pointer; }
+    .form-container .toggle-form { text-align: center; margin-top: 1rem; }
+    .form-container .toggle-form button { background: none; border: none; color: #6b21a8; text-decoration: underline; cursor: pointer; }
+    .message-box { padding: 0.75rem; margin-top: 1rem; text-align: center; border-radius: 0.5rem; display: none; }
+    #admin-content-section { display: none; width: 100%; max-width: 1200px; }
+    .admin-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 2rem; }
+    @media (min-width: 1024px) { .admin-grid { grid-template-columns: 1fr 1fr; } }
+    .admin-panel { background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .admin-panel h2 { font-size: 1.5rem; border-bottom: 2px solid #eee; padding-bottom: 0.75rem; margin-top: 0; }
+    #manage-drinks-list { display: grid; grid-template-columns: 1fr; gap: 1rem; max-height: 500px; overflow-y: auto; padding-right: 0.5rem; }
+    .drink-manage-card { background: #f9f9f9; padding: 1rem; border-radius: 0.5rem; }
+    .drink-manage-card form { display: flex; flex-direction: column; gap: 0.5rem; }
+    #sales-report-content table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    #sales-report-content th, #sales-report-content td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee; }
+    #sales-report-content th { background: #f9f9f9; }
+    footer { background-color: #333; color: white; padding: 1.5rem; margin-top: 2rem; border-top-left-radius: 1rem; border-top-right-radius: 1rem; text-align: center; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>Admin Panel ⚙️</h1>
+    <button id="logout-btn">Logout</button>
+  </div>
+</header>
+
+<main>
+  <!-- Authentication Section -->
+  <section id="auth-section">
+    <!-- Login Form -->
+    <div id="login-form-container" class="form-container">
+      <h2>Admin Login</h2>
+      <form id="login-form">
+        <div>
+          <label for="loginUsername">Username:</label>
+          <input type="text" id="loginUsername" name="username" required>
+        </div>
+        <div>
+          <label for="loginPassword">Password:</label>
+          <input type="password" id="loginPassword" name="password" required>
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      <div id="login-message-box" class="message-box"></div>
+      <p class="toggle-form">Don't have an account? <button id="show-register-btn">Register here</button></p>
+    </div>
+
+    <!-- Register Form (hidden by default) -->
+    <div id="register-form-container" class="form-container" style="display: none;">
+      <h2>Admin Register</h2>
+      <form id="register-form">
+        <div>
+          <label for="registerUsername">Username:</label>
+          <input type="text" id="registerUsername" name="username" required>
+        </div>
+        <div>
+          <label for="registerPassword">Password:</label>
+          <input type="password" id="registerPassword" name="password" required>
+        </div>
+        <button type="submit">Register</button>
+      </form>
+      <div id="register-message-box" class="message-box"></div>
+      <p class="toggle-form">Already have an account? <button id="show-login-btn">Login here</button></p>
+    </div>
+  </section>
+
+  <!-- Admin Content Section (hidden until logged in) -->
+  <section id="admin-content-section">
+    <div class="admin-grid">
+      <!-- Manage Drinks -->
+      <div class="admin-panel">
+        <h2>Manage Drinks</h2>
+        <div id="manage-drinks-list">
+          <p>Loading drinks...</p>
+        </div>
+      </div>
+
+      <!-- Sales Report -->
+      <div class="admin-panel">
+        <h2>Sales Report</h2>
+        <button id="refresh-report-btn" style="width: 100%; padding: 0.75rem; background-color: #7c3aed; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Refresh Sales Report</button>
+        <div id="sales-report-content">
+          <p>Click "Refresh Report" to view sales data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>&copy; 2025 Spring Drinks. Admin Panel.</p>
+</footer>
+
+<script src="admin.js"></script>
+</body>
+</html>

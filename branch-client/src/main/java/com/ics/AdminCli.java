@@ -26,7 +26,6 @@ public class AdminCli {
         // Connect to server
         try {
             client = new SocketClient();
-            client.connect();
 
             // Get branch assignment
             Response response = client.sendRequest(new Request("CONNECT", null));

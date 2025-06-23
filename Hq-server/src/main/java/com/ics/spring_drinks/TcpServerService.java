@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,9 +15,8 @@ import java.util.concurrent.Executors;
 @Service
 public class TcpServerService {
     private static final int PORT = 9090;
-
     private ServerSocket serverSocket;
-    private ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor = Executors.newCachedThreadPool();
     private volatile boolean running = true;
 
     private final BranchManager branchManager;

@@ -26,7 +26,7 @@ public class AdminCli {
         try {
             client = new SocketClient();
             client.connect();
-            Response response = client.sendRequest(new Request("CONNECT", null));
+            Response response = client.sendRequest(new Request("CONNECT_ADMIN", null));
             if (response.getStatus() == Response.Status.SUCCESS) {
                 branch = (Branch) response.getData();
                 System.out.println("Connected to " + branch.name() + " branch");

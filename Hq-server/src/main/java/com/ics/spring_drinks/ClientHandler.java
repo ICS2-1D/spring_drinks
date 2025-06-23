@@ -22,29 +22,33 @@ public class ClientHandler implements Runnable {
         this.branchManager = branchManager;
         this.services = services;
     }
-
     @Override
     public void run() {
         try (ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
              ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream())) {
 
-            // --- FIX START ---
-            // Step 1: Perform a handshake. Read the initial request from the client first.
+            // Step 1: Read initial request (CONNECT or CONNECT_ADMIN)
             Object initialRequestObject = in.readObject();
-            if (!(initialRequestObject instanceof Request initialRequest) || !"CONNECT".equalsIgnoreCase(initialRequest.getType())) {
-                // If the first request is not a valid CONNECT request, terminate.
-                sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Expected CONNECT request.");
-                return; // Exit the run method
+            if (!(initialRequestObject instanceof Request initialRequest)) {
+                sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Invalid request object.");
+                return;
             }
 
-            // Step 2: Now that the CONNECT request is received, process it and send the response.
+            boolean isAdmin = false;
+
+            if ("CONNECT_ADMIN".equalsIgnoreCase(initialRequest.getType())) {
+                isAdmin = true;
+            } else if (!"CONNECT".equalsIgnoreCase(initialRequest.getType())) {
+                sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Expected CONNECT or CONNECT_ADMIN.");
+                return;
+            }
+
             System.out.println("📨 Initial Request: " + initialRequest.getType() + " from " + clientSocket.getInetAddress().getHostAddress());
-            assignedBranch = branchManager.assignBranch(clientId, clientSocket.getInetAddress());
+
+            assignedBranch = branchManager.assignBranch(clientId, clientSocket.getInetAddress(), isAdmin);
             sendResponse(out, Response.Status.SUCCESS, assignedBranch, "Connected to branch: " + assignedBranch.name());
-            // --- FIX END ---
 
-
-            // Step 3: Enter the main loop to handle all subsequent client requests.
+            // Step 3: Loop to process ongoing requests
             while (true) {
                 Request request = (Request) in.readObject();
                 System.out.println("📨 Request: " + request.getType() + " from " + assignedBranch.name());
@@ -63,6 +67,7 @@ public class ClientHandler implements Runnable {
             cleanup();
         }
     }
+
 
     private Response processRequest(Request request) {
         try {

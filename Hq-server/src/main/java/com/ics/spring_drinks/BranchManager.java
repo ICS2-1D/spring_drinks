@@ -16,12 +16,12 @@ public class BranchManager {
     private final Set<Branch> assignedBranches = new ConcurrentSkipListSet<>();
     private final Object lock = new Object();
 
-    public Branch assignBranch(String clientId, InetAddress clientAddress) throws IOException {
+    public Branch assignBranch(String clientId, InetAddress clientAddress, boolean isAdmin) throws IOException {
         synchronized (lock) {
-            Branch branch = findAvailableBranch(); // The client address is no longer needed for this logic
+            Branch branch = findAvailableBranch(isAdmin);
 
             if (branch == null) {
-                throw new IOException("No available branches. All " + Branch.values().length + " branches are currently occupied.");
+                throw new IOException("No available branches.");
             }
 
             clientBranches.put(clientId, branch);
@@ -33,6 +33,7 @@ public class BranchManager {
             return branch;
         }
     }
+
 
     public void unassignBranch(String clientId, Branch branch) {
         synchronized (lock) {
@@ -52,23 +53,20 @@ public class BranchManager {
      *
      * @return An available Branch, or null if all are occupied.
      */
-    private Branch findAvailableBranch() {
-        // Rule 1: If the NAIROBI branch is available, assign it.
-        // This ensures the first client connection always gets admin access.
-        if (!assignedBranches.contains(Branch.NAIROBI)) {
+    private Branch findAvailableBranch(boolean isAdmin) {
+        if (isAdmin && !assignedBranches.contains(Branch.NAIROBI)) {
             return Branch.NAIROBI;
         }
 
-        // Rule 2: If NAIROBI is taken, find any other available branch for regular clients.
         for (Branch branch : Branch.values()) {
             if (branch != Branch.NAIROBI && !assignedBranches.contains(branch)) {
                 return branch;
             }
         }
 
-        // Rule 3: If all branches are occupied, return null.
         return null;
     }
+
 
     // --- The isLocalConnection method is no longer needed and has been removed ---
 

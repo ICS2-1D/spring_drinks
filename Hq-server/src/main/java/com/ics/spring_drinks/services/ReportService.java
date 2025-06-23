@@ -1,7 +1,8 @@
 package com.ics.spring_drinks.services;
 
-import com.ics.dtos.SalesReportDto;
+import com.ics.dtos.ConsolidatedSalesReportDto;
 import com.ics.dtos.RawSalesRow;
+import com.ics.dtos.SalesReportDto;
 import com.ics.models.Branch;
 import com.ics.spring_drinks.repository.SalesReportRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class ReportService {
      * Builds a consolidated sales report for all branches.
      * @return A DTO containing the grand total and a map of reports for each branch.
      */
-    public SalesReportDto buildConsolidatedReport() {
+    public ConsolidatedSalesReportDto buildConsolidatedReport() {
         List<RawSalesRow> allSalesData = salesReportRepository.getSalesData();
         double grandTotal = allSalesData.stream().mapToDouble(RawSalesRow::getTotalSales).sum();
 
@@ -39,7 +40,7 @@ public class ReportService {
             finalReportMap.put(branch, new SalesReportDto(branchTotal, drinksSold));
         });
 
-        return new SalesReportDto(grandTotal, finalReportMap);
+        return new ConsolidatedSalesReportDto(grandTotal, finalReportMap);
     }
 
     /**

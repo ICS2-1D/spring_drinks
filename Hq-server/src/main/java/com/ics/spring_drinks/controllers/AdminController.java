@@ -59,16 +59,16 @@ public class AdminController {
         }
     }
 
-    // TODO: Implement this endpoint in a new SalesReportService or within AdminService
-    @GetMapping("/sales/report")
-    public ResponseEntity<SalesReportDto> getSalesReport() {
-        try {
-            SalesReportDto report = reportService.buildSalesReport();
-            return ResponseEntity.ok(report);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
-        }
-    }
+//    // TODO: Implement this endpoint in a new SalesReportService or within AdminService
+//    @GetMapping("/sales/report")
+//    public ResponseEntity<SalesReportDto> getSalesReport() {
+//        try {
+//            SalesReportDto report = reportService.buildSalesReport();
+//            return ResponseEntity.ok(report);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(null);
+//        }
+//    }
 
 }

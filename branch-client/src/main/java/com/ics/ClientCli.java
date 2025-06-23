@@ -8,9 +8,7 @@ import com.ics.dtos.Request;
 import com.ics.dtos.Response;
 import com.ics.models.Branch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class ClientCli {
       private static SocketClient client;
@@ -182,7 +180,6 @@ public class ClientCli {
       }
 
       private static void placeOrder(String customerName, String customerPhone, List<OrderItemRequest> orderItems) {
-            // Create order request
             OrderRequest orderRequest = new OrderRequest();
             orderRequest.setCustomerName(customerName);
             orderRequest.setCustomerPhoneNumber(customerPhone);
@@ -190,23 +187,33 @@ public class ClientCli {
             orderRequest.setItems(orderItems);
 
             // Send order to server
-            Request request = new Request("CREATE_ORDER", orderRequest);
-            Response response = client.sendRequest(request);
+            Request createOrderRequest = new Request("CREATE_ORDER", orderRequest);
+            Response orderResponse = client.sendRequest(createOrderRequest);
 
-            if (response.getStatus() == Response.Status.SUCCESS) {
-                  OrderResponse orderResponse = (OrderResponse) response.getData();
-                  System.out.println("\nORDER PLACED! Order #" + orderResponse.getOrderNumber());
+            if (orderResponse.getStatus() == Response.Status.SUCCESS) {
+                  OrderResponse orderData = (OrderResponse) orderResponse.getData();
+                  System.out.println("\nORDER PLACED! Order #" + orderData.getOrderNumber());
+                  System.out.println("Processing and recording payment...");
 
-                  // Simulate payment
-                  System.out.println("Processing payment...");
-                  try {
-                        Thread.sleep(2000); // Wait 2 seconds
-                        System.out.println("Payment successful!");
-                  } catch (InterruptedException e) {
-                        // Handle interruption
+                  // --- PAYMENT RECORDING LOGIC ---
+                  Map<String, Object> paymentData = new HashMap<>();
+                  paymentData.put("orderId", orderData.getOrderId());
+                  paymentData.put("customerNumber", customerPhone);
+                  paymentData.put("paymentMethod", "M-PESA"); // Or any other method
+                  paymentData.put("paymentStatus", "SUCCESS");
+
+                  Request createPaymentRequest = new Request("CREATE_PAYMENT", paymentData);
+                  Response paymentResponse = client.sendRequest(createPaymentRequest);
+
+                  if (paymentResponse.getStatus() == Response.Status.SUCCESS) {
+                        System.out.println("Payment successful and recorded!");
+                  } else {
+                        System.out.println("❌ Critical Error: Order was placed, but payment recording failed: " + paymentResponse.getMessage());
                   }
+                  // --- END OF PAYMENT LOGIC ---
+
             } else {
-                  System.out.println("Order failed: " + response.getMessage());
+                  System.out.println("Order failed: " + orderResponse.getMessage());
             }
       }
 }

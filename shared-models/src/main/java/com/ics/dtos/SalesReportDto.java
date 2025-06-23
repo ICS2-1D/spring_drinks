@@ -1,5 +1,6 @@
 package com.ics.dtos;
 
+import com.ics.models.Branch;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,20 +12,11 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SalesReportDto  implements Serializable {
+public class SalesReportDto implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    private double totalSales;
-    private Map<String, DrinkSale> drinksSold;
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class DrinkSale   implements Serializable{
-        @Serial
-        private static final long serialVersionUID = 1L;
-        private int quantity;
-        private double totalPrice;
-    }
+    private double grandTotalSales;
+    private Map<Branch, SalesReportDto> salesByBranch;
+
 }
-

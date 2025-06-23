@@ -37,9 +37,20 @@ public class DiscoveryResponder {
         }
     }
 
+// In DiscoveryResponder.java
+
     private void sendDiscoveryResponse(DatagramSocket socket, DatagramPacket request)
             throws IOException {
-        String serverAddress = InetAddress.getLocalHost().getHostAddress();
+
+        // Check if the discovery request came from the same machine (localhost)
+        boolean isLocalClient = request.getAddress().isLoopbackAddress() ||
+                request.getAddress().isAnyLocalAddress();
+
+        // If the client is local, tell it to connect to localhost. Otherwise, use the server's public IP.
+        String serverAddress = isLocalClient
+                ? "127.0.0.1"
+                : InetAddress.getLocalHost().getHostAddress();
+
         String response = "HQ:" + serverAddress + ":9999";
 
         byte[] responseData = response.getBytes();
@@ -49,5 +60,6 @@ public class DiscoveryResponder {
         );
 
         socket.send(responsePacket);
+        System.out.println("✅ Responded to discovery request from " + request.getAddress().getHostAddress() + " with server address " + serverAddress);
     }
 }

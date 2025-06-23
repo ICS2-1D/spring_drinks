@@ -3,7 +3,7 @@ package com.ics.spring_drinks;
 import com.ics.dtos.*;
 import com.ics.models.Branch;
 import com.ics.models.OrderStatus;
-import com.ics.spring_drinks.services.*;
+
 
 import java.io.*;
 import java.net.Socket;
@@ -28,12 +28,23 @@ public class ClientHandler implements Runnable {
         try (ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
              ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream())) {
 
-            // Assign branch to client
-            assignedBranch = branchManager.assignBranch(clientId, clientSocket.getInetAddress());
-            sendResponse(out, Response.Status.SUCCESS, assignedBranch,
-                    "Connected to branch: " + assignedBranch.name());
+            // --- FIX START ---
+            // Step 1: Perform a handshake. Read the initial request from the client first.
+            Object initialRequestObject = in.readObject();
+            if (!(initialRequestObject instanceof Request initialRequest) || !"CONNECT".equalsIgnoreCase(initialRequest.getType())) {
+                // If the first request is not a valid CONNECT request, terminate.
+                sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Expected CONNECT request.");
+                return; // Exit the run method
+            }
 
-            // Handle client requests
+            // Step 2: Now that the CONNECT request is received, process it and send the response.
+            System.out.println("📨 Initial Request: " + initialRequest.getType() + " from " + clientSocket.getInetAddress().getHostAddress());
+            assignedBranch = branchManager.assignBranch(clientId, clientSocket.getInetAddress());
+            sendResponse(out, Response.Status.SUCCESS, assignedBranch, "Connected to branch: " + assignedBranch.name());
+            // --- FIX END ---
+
+
+            // Step 3: Enter the main loop to handle all subsequent client requests.
             while (true) {
                 Request request = (Request) in.readObject();
                 System.out.println("📨 Request: " + request.getType() + " from " + assignedBranch.name());
@@ -55,6 +66,7 @@ public class ClientHandler implements Runnable {
 
     private Response processRequest(Request request) {
         try {
+            // Note: "CONNECT" is correctly handled outside this switch now.
             return switch (request.getType()) {
                 case "GET_BRANCH_INFO" -> handleBranchInfo();
                 case "GET_ALL_DRINKS" -> handleGetDrinks();
@@ -65,7 +77,7 @@ public class ClientHandler implements Runnable {
                 case "REGISTER_ADMIN" -> handleAdminRegister(request);
                 case "ADD_DRINK" -> handleAddDrink(request);
                 case "UPDATE_DRINK" -> handleUpdateDrink(request);
-                case "GET_SALES_REPORT" -> handleSalesReport();
+                case "GET_SALES_REPORT" -> handleSalesReport(request);
                 default -> errorResponse("Unknown request type: " + request.getType());
             };
         } catch (Exception e) {
@@ -152,14 +164,38 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private Response handleSalesReport() {
+
+    private Response handleSalesReport(Request request) {
         if (!isAdminBranch()) return adminOnlyError();
 
         try {
-            Object report = services.reportService().buildSalesReport();
-            return successResponse(report, "Sales report generated");
+            // Check the request payload to see if a specific branch was requested
+            Map<String, Object> data = (Map<String, Object>) request.getPayload();
+            Branch targetBranch = null;
+
+            if (data != null && data.containsKey("branch")) {
+                try {
+                    targetBranch = Branch.valueOf(data.get("branch").toString());
+                } catch (IllegalArgumentException e) {
+                    return errorResponse("Invalid branch name specified.");
+                }
+            }
+
+            Object report;
+            if (targetBranch != null) {
+                // If a branch is specified, get the report for that branch
+                report = services.reportService().buildSalesReportForBranch(targetBranch);
+            } else {
+                // Otherwise, get the full consolidated report
+                report = services.reportService().buildConsolidatedReport();
+            }
+
+            return successResponse(report, "Sales report generated successfully");
         } catch (Exception e) {
-            return errorResponse("Failed to generate report: " + e.getMessage());
+            // It's good practice to log the full error on the server
+            System.err.println("❌ Failed to generate report: " + e.getMessage());
+            e.printStackTrace();
+            return errorResponse("Failed to generate report: An internal error occurred.");
         }
     }
 

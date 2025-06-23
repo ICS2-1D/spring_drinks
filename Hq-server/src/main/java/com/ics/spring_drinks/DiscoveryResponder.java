@@ -42,16 +42,15 @@ public class DiscoveryResponder {
     private void sendDiscoveryResponse(DatagramSocket socket, DatagramPacket request)
             throws IOException {
 
-        // Check if the discovery request came from the same machine (localhost)
         boolean isLocalClient = request.getAddress().isLoopbackAddress() ||
                 request.getAddress().isAnyLocalAddress();
 
-        // If the client is local, tell it to connect to localhost. Otherwise, use the server's public IP.
         String serverAddress = isLocalClient
                 ? "127.0.0.1"
                 : InetAddress.getLocalHost().getHostAddress();
 
-        String response = "HQ:" + serverAddress + ":9999";
+        // Use the correct server port (your socket server port, usually 9090)
+        String response = "HQ:" + serverAddress;
 
         byte[] responseData = response.getBytes();
         DatagramPacket responsePacket = new DatagramPacket(
@@ -62,4 +61,5 @@ public class DiscoveryResponder {
         socket.send(responsePacket);
         System.out.println("✅ Responded to discovery request from " + request.getAddress().getHostAddress() + " with server address " + serverAddress);
     }
+
 }

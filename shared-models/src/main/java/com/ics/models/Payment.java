@@ -10,10 +10,12 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(name = "payments")
 public class Payment implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paymentId;
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)

@@ -50,7 +50,7 @@ public class OrderController {
         Customer customer = order.getCustomer();
         if (customer != null) {
             response.setCustomerName(customer.getCustomer_name());
-            response.setCustomerPhoneNumber(customer.getCustomer_phone_number());
+            response.setCustomerPhoneNumber(customer.getCustomerPhoneNumber());
         }
 
         List<OrderItemResponse> items = order.getItems().stream()

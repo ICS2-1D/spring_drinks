@@ -6,13 +6,22 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
+import java.util.ArrayList;
 
+@Entity
+@Table(name = "customers")
 @Data
 @RequiredArgsConstructor
-@Embeddable
 public class Customer implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long customerId;
+
     private String customer_name;
-    private String customer_phone_number;
+    private String customerPhoneNumber;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
 }
+

@@ -18,4 +18,7 @@ public class DrinkDto  implements Serializable {
     private String drinkName;
     private int drinkQuantity;
     private double drinkPrice;
+
+
+
 }

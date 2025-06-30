@@ -101,7 +101,7 @@ public class ClientCli {
         System.out.println("---------------------------------------");
         Map<Long, DrinkDto> drinksMap = new HashMap<>();
         for (DrinkDto drink : availableDrinks) {
-            System.out.printf("%-5d %-20s $%-9.2f%n", drink.getId(), drink.getDrinkName(), drink.getDrinkPrice());
+            System.out.printf("%-5d %-20s Ksh %-9.2f%n", drink.getId(), drink.getDrinkName(), drink.getDrinkPrice());
             drinksMap.put(drink.getId(), drink);
         }
         System.out.println("---------------------------------------");
@@ -170,11 +170,11 @@ public class ClientCli {
         for (OrderItemRequest item : items) {
             DrinkDto drink = drinksMap.get(item.getDrinkId());
             double subtotal = drink.getDrinkPrice() * item.getQuantity();
-            System.out.printf("%-20s %-10d $%-9.2f $%-9.2f%n", drink.getDrinkName(), item.getQuantity(), drink.getDrinkPrice(), subtotal);
+            System.out.printf("%-20s %-10d Ksh %-9.2f $%-9.2f%n", drink.getDrinkName(), item.getQuantity(), drink.getDrinkPrice(), subtotal);
             total += subtotal;
         }
         System.out.println("---------------------------------------------------");
-        System.out.printf("TOTAL: $%.2f%n", total);
+        System.out.printf("TOTAL: Ksh %.2f%n", total);
 
         System.out.print("\nType 'YES' to confirm and pay: ");
         String confirm = scanner.nextLine();

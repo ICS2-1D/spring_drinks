@@ -2,9 +2,157 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spring Drinks - Admin Panel</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Configure Tailwind CSS to use 'Inter' font and enable JIT mode
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Custom styles for the scrollbar, applying to all scrollable elements */
+    ::-webkit-scrollbar {
+      width: 8px; /* Width of the scrollbar */
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1; /* Color of the scrollbar track */
+      border-radius: 10px; /* Rounded corners for the track */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888; /* Color of the scrollbar thumb */
+      border-radius: 10px; /* Rounded corners for the thumb */
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555; /* Color of the scrollbar thumb on hover */
+    }
+  </style>
 </head>
-<body>
-$END$
+<body class="bg-gray-100 font-sans antialiased flex flex-col min-h-screen">
+
+<!-- Header Section -->
+<header class="bg-gradient-to-r from-red-900 to-red-800 text-white p-6 shadow-lg rounded-b-xl flex justify-between items-center">
+  <div class="container mx-auto flex justify-between items-center">
+    <h1 class="text-4xl font-extrabold tracking-tight">Admin Panel ⚙️</h1>
+    <button id="logout-btn" class="bg-white text-red-900 hover:bg-red-200 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out hidden">
+      Logout
+    </button>
+  </div>
+</header>
+
+<!-- Main Content Area -->
+<main class="container mx-auto p-8 flex-grow flex flex-col items-center justify-center">
+
+  <!-- Authentication Section (Login/Register) -->
+  <section id="auth-section" class="bg-white p-10 rounded-xl shadow-md w-full max-w-md">
+    <!-- Login Form -->
+    <div id="login-form-container">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Admin Login</h2>
+      <form id="login-form" class="space-y-6">
+        <div>
+          <label for="loginUsername" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
+          <input type="text" id="loginUsername" name="username" required
+                 class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent transition duration-200">
+        </div>
+        <div>
+          <label for="loginPassword" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+          <input type="password" id="loginPassword" name="password" required
+                 class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent transition duration-200">
+        </div>
+        <button type="submit"
+                class="w-full bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+          Login
+        </button>
+      </form>
+      <div id="login-message-box" class="mt-6 p-3 text-center rounded-lg text-sm hidden"></div>
+      <p class="text-center text-gray-600 mt-4">Don't have an account? <button id="show-register-btn" class="text-red-900 hover:underline font-semibold focus:outline-none">Register here</button></p>
+    </div>
+
+    <!-- Register Form (hidden by default) -->
+    <div id="register-form-container" class="hidden">
+      <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Admin Register</h2>
+      <form id="register-form" class="space-y-6">
+        <div>
+          <label for="registerUsername" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
+          <input type="text" id="registerUsername" name="username" required
+                 class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent transition duration-200">
+        </div>
+        <div>
+          <label for="registerPassword" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+          <input type="password" id="registerPassword" name="password" required
+                 class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent transition duration-200">
+        </div>
+        <div>
+          <label for="confirmPassword" class="block text-gray-700 text-sm font-bold mb-2">Confirm Password:</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required
+                 class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent transition duration-200">
+        </div>
+        <button type="submit"
+                class="w-full bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+          Register
+        </button>
+      </form>
+      <div id="register-message-box" class="mt-6 p-3 text-center rounded-lg text-sm hidden"></div>
+      <p class="text-center text-gray-600 mt-4">Already have an account? <button id="show-login-btn" class="text-red-900 hover:underline font-semibold focus:outline-none">Login here</button></p>
+    </div>
+  </section>
+
+  <!-- Admin Content Section (hidden until logged in) -->
+  <section id="admin-content-section" class="hidden w-full max-w-6xl">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+      <!-- Manage Drinks Section -->
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b-2 pb-3">Manage Drinks</h2>
+        <div id="manage-drinks-list" class="grid grid-cols-1 gap-4 overflow-y-auto max-h-[500px] pr-2">
+          <!-- Drink cards with update forms will be loaded here by JavaScript -->
+          <p class="text-gray-500 text-center py-4">Loading drinks for management...</p>
+        </div>
+      </div>
+
+      <!-- Sales Report Section -->
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b-2 pb-3">Sales Report</h2>
+        <div id="sales-report-content">
+          <p class="text-gray-500 text-center py-4">Click "Refresh Report" to view sales data.</p>
+          <p class="text-2xl font-bold text-gray-900 mt-4">Total Sales: <span id="total-sales">$0.00</span></p>
+          <div id="drinks-sold-report" class="mt-4 overflow-y-auto max-h-80 pr-2">
+            <!-- Sales data will be loaded here -->
+            <p class="text-gray-500 text-center py-4">No sales data available.</p>
+          </div>
+        </div>
+        <button id="refresh-report-btn"
+                class="mt-6 w-full bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+          Refresh Sales Report
+        </button>
+        <div id="report-message-box" class="mt-4 p-3 text-center rounded-lg text-sm hidden"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer Section -->
+<footer class="bg-gray-800 text-white py-6 mt-8 rounded-t-xl shadow-inner">
+  <div class="container mx-auto text-center">
+    <p>&copy; 2025 Spring Drinks. Admin Panel.</p>
+    <div class="flex justify-center space-x-4 mt-3">
+      <a href="#" class="text-gray-400 hover:text-white transition duration-300">Privacy Policy</a>
+      <a href="#" class="text-gray-400 hover:text-white transition duration-300">Terms of Service</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Link to our JavaScript file -->
+<script src="admin.js"></script>
 </body>
 </html>

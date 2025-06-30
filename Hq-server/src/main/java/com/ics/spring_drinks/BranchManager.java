@@ -1,6 +1,7 @@
 package com.ics.spring_drinks;
 
 import com.ics.models.Branch;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -16,61 +17,92 @@ public class BranchManager {
     private final Set<Branch> assignedBranches = new ConcurrentSkipListSet<>();
     private final Object lock = new Object();
 
+    @Value("${server.admin.ip:}")
+    private String adminIpAddress;
+
     public Branch assignBranch(String clientId, InetAddress clientAddress, boolean isAdmin) throws IOException {
         synchronized (lock) {
-            Branch branch = findAvailableBranch(isAdmin);
+            String clientIp = clientAddress.getHostAddress();
+            System.out.println("🔍 Assigning branch for client IP: " + clientIp + ", isAdmin: " + isAdmin);
+
+            Branch branch = findAvailableBranch(clientIp, isAdmin);
 
             if (branch == null) {
-                throw new IOException("No available branches.");
+                System.out.println("❌ No available branches. Currently assigned: " + assignedBranches);
+                printCurrentAssignments();
+                throw new IOException("No available branches. All " + Branch.values().length + " branches are occupied.");
             }
 
             clientBranches.put(clientId, branch);
             assignedBranches.add(branch);
 
-            System.out.println("🏢 Assigned " + branch.name() + " to client " + clientId);
+            System.out.println("🏢 Assigned " + branch.name() + " to client " + clientId + " (IP: " + clientIp + ")");
             System.out.println("📊 Branches assigned: " + assignedBranches.size() + "/" + Branch.values().length);
 
             return branch;
         }
     }
 
-
     public void unassignBranch(String clientId, Branch branch) {
         synchronized (lock) {
-            // Important: Only unassign if the client and branch match
             if (branch != null && branch.equals(clientBranches.get(clientId))) {
                 clientBranches.remove(clientId);
                 assignedBranches.remove(branch);
                 System.out.println("🔓 Unassigned " + branch.name() + " from client " + clientId);
+                System.out.println("📊 Branches assigned: " + assignedBranches.size() + "/" + Branch.values().length);
             }
         }
     }
 
-    /**
-     * Finds an available branch based on a "first-come, first-served" policy for the admin branch.
-     * The first client to connect gets the NAIROBI branch.
-     * Subsequent clients get the next available non-admin branch.
-     *
-     * @return An available Branch, or null if all are occupied.
-     */
-    private Branch findAvailableBranch(boolean isAdmin) {
-        if (isAdmin && !assignedBranches.contains(Branch.NAIROBI)) {
+    private Branch findAvailableBranch(String clientIp, boolean isAdmin) {
+        // Check if this IP should get NAIROBI automatically
+        boolean shouldGetNairobi = shouldAssignNairobi(clientIp, isAdmin);
+
+        if (shouldGetNairobi && !assignedBranches.contains(Branch.NAIROBI)) {
+            System.out.println("🎯 Assigning NAIROBI to privileged client: " + clientIp);
             return Branch.NAIROBI;
         }
 
+        // For regular clients, assign other branches in order
         for (Branch branch : Branch.values()) {
             if (branch != Branch.NAIROBI && !assignedBranches.contains(branch)) {
+                System.out.println("🏪 Assigning " + branch.name() + " to client: " + clientIp);
                 return branch;
+            }
+        }
+
+        // If only NAIROBI is available but client shouldn't get it
+        if (!assignedBranches.contains(Branch.NAIROBI)) {
+            if (shouldGetNairobi) {
+                System.out.println("🎯 Last resort: Assigning NAIROBI to privileged client: " + clientIp);
+                return Branch.NAIROBI;
+            } else {
+                System.out.println("⚠️ Only NAIROBI available but client is not privileged: " + clientIp);
             }
         }
 
         return null;
     }
 
+    private boolean shouldAssignNairobi(String clientIp, boolean isAdmin) {
+        // Your PC's IP always gets NAIROBI
+        if (adminIpAddress != null && !adminIpAddress.isEmpty() && clientIp.equals(adminIpAddress)) {
+            return true;
+        }
 
-    // --- The isLocalConnection method is no longer needed and has been removed ---
+        // Admin connections get NAIROBI
+        if (isAdmin) {
+            return true;
+        }
 
-    // Getters for monitoring
+        // Localhost connections get NAIROBI (for development)
+        if (clientIp.equals("127.0.0.1") || clientIp.equals("0:0:0:0:0:0:0:1")) {
+            return true;
+        }
+
+        return false;
+    }
+
     public Map<String, Branch> getClientBranches() {
         return new ConcurrentHashMap<>(clientBranches);
     }
@@ -78,15 +110,27 @@ public class BranchManager {
     public Set<Branch> getAssignedBranches() {
         return new ConcurrentSkipListSet<>(assignedBranches);
     }
+
+    public void printCurrentAssignments() {
+        System.out.println("=== Current Branch Assignments ===");
+        if (clientBranches.isEmpty()) {
+            System.out.println("No clients currently connected.");
+        } else {
+            clientBranches.forEach((clientId, branch) ->
+                    System.out.println("Client: " + clientId + " -> Branch: " + branch.name()));
+        }
+        System.out.println("Assigned branches: " + assignedBranches);
+        System.out.println("Available branches: " + getAvailableBranches());
+        System.out.println("==============================");
+    }
+
+    private Set<Branch> getAvailableBranches() {
+        Set<Branch> available = new ConcurrentSkipListSet<>();
+        for (Branch branch : Branch.values()) {
+            if (!assignedBranches.contains(branch)) {
+                available.add(branch);
+            }
+        }
+        return available;
+    }
 }
-//}
-//```
-//
-//        ### Key Changes in This Fix:
-//
-//        1.  **New `findAvailableBranch()` Logic:** The logic is now much simpler and more direct:
-//        * Is `Branch.NAIROBI` free? If yes, assign it. This will apply to the very first client that connects after the server starts.
-//        * If `NAIROBI` is taken, loop through the *other* branches and assign the first one that is free.
-//2.  **`isLocalConnection()` Removed:** This method is no longer necessary, as the new logic doesn't rely on the client's IP address.
-//
-//        Now, when you restart your server, the first client you run (which will be your `AdminCli`) is guaranteed to be assigned the `NAIROBI` branch, and you will be able to log in and use the admin functio

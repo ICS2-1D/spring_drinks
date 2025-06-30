@@ -83,7 +83,7 @@ public class ClientCli {
 
         Customer customer = new Customer();
         customer.setCustomer_name(name);
-        customer.setCustomer_phone_number(phone);
+        customer.setCustomerPhoneNumber(phone);
         return customer;
     }
 
@@ -186,7 +186,7 @@ public class ClientCli {
 
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.setCustomerName(customer.getCustomer_name());
-        orderRequest.setCustomerPhoneNumber(customer.getCustomer_phone_number());
+        orderRequest.setCustomerPhoneNumber(customer.getCustomerPhoneNumber());
         orderRequest.setBranch(Branch.NAIROBI);
         orderRequest.setItems(items);
 
@@ -196,7 +196,7 @@ public class ClientCli {
         if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
             OrderResponse orderResponse = (OrderResponse) serviceResponse.getData();
             System.out.println("\n🎉 ORDER PLACED SUCCESSFULLY! Order Number: " + orderResponse.getOrderNumber());
-            simulatePayment(orderResponse.getOrderId(), customer.getCustomer_phone_number());
+            simulatePayment(orderResponse.getOrderId(), customer.getCustomerPhoneNumber());
         } else {
             System.out.println("❌ Failed to place order: " + serviceResponse.getMessage());
         }

@@ -167,7 +167,7 @@ public class AdminCli {
         System.out.println("ID | Name                 | Price | Quantity");
         System.out.println("---|----------------------|-------|----------");
         for (DrinkDto drink : drinks) {
-            System.out.printf("%-2d | %-20s | $%-4.2f | %d%n",
+            System.out.printf("%-2d | %-20s | ksh %-4.2f | %d%n",
                     drink.getId(), drink.getDrinkName(), drink.getDrinkPrice(), drink.getDrinkQuantity());
         }
 
@@ -311,7 +311,7 @@ public class AdminCli {
         System.out.println("==      CONSOLIDATED SALES REPORT      ==");
         System.out.println("=============================================");
         System.out.println("Date: " + java.time.LocalDate.now());
-        System.out.printf("GRAND TOTAL (ALL BRANCHES): $%.2f%n", report.getGrandTotalSales());
+        System.out.printf("GRAND TOTAL (ALL BRANCHES): ksh %.2f%n", report.getGrandTotalSales());
         System.out.println("---------------------------------------------");
 
         if(report.getSalesByBranch() == null || report.getSalesByBranch().isEmpty()){
@@ -331,7 +331,7 @@ public class AdminCli {
      * @param report A standard SalesReportDto.
      */
     private static void displaySingleReport(SalesReportDto report) {
-        System.out.printf("Total Branch Sales: $%.2f%n", report.getTotalSales());
+        System.out.printf("Total Branch Sales: ksh %.2f%n", report.getTotalSales());
 
         if (report.getDrinksSold() != null && !report.getDrinksSold().isEmpty()) {
             System.out.println("\n  Drink Name           | Quantity | Total Sales");
@@ -342,7 +342,7 @@ public class AdminCli {
                     .forEach(entry -> {
                         String drinkName = entry.getKey();
                         SalesReportDto.DrinkSale sale = entry.getValue();
-                        System.out.printf("  %-20s | %-8d | $%.2f%n",
+                        System.out.printf("  %-20s | %-8d | ksh %.2f%n",
                                 drinkName,
                                 sale.getQuantity(),
                                 sale.getTotalPrice());

@@ -85,7 +85,7 @@ public class ClientCli {
             System.out.println("\n=== DRINKS MENU ===");
             for (int i = 0; i < drinks.size(); i++) {
                   DrinkDto drink = drinks.get(i);
-                  System.out.println((i + 1) + ". " + drink.getDrinkName() + " - $" + drink.getDrinkPrice());
+                  System.out.println((i + 1) + ". " + drink.getDrinkName() + " - ksh " + drink.getDrinkPrice());
             }
 
             // Let customer pick drinks
@@ -171,12 +171,12 @@ public class ClientCli {
 
                   if (drink != null) {
                         double subtotal = drink.getDrinkPrice() * item.getQuantity();
-                        System.out.println(drink.getDrinkName() + " x" + item.getQuantity() + " = $" + subtotal);
+                        System.out.println(drink.getDrinkName() + " x" + item.getQuantity() + " = ksh " + subtotal);
                         total += subtotal;
                   }
             }
 
-            System.out.println("TOTAL: $" + total);
+            System.out.println("TOTAL: ksh  " + total);
       }
 
       private static void placeOrder(String customerName, String customerPhone, List<OrderItemRequest> orderItems) {

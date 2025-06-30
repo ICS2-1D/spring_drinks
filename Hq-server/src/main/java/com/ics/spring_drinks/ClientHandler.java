@@ -15,6 +15,7 @@ public class ClientHandler implements Runnable {
     private final BranchManager branchManager;
     private final ServiceProvider services;
     private Branch assignedBranch;
+    private static final int CLIENT_TIMEOUT = 90000;
 
     public ClientHandler(Socket socket, BranchManager branchManager, ServiceProvider services) {
         this.clientSocket = socket;
@@ -22,52 +23,72 @@ public class ClientHandler implements Runnable {
         this.branchManager = branchManager;
         this.services = services;
     }
+
     @Override
     public void run() {
-        try (ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-             ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream())) {
+        try {
+            // Set socket timeout
+            clientSocket.setSoTimeout(CLIENT_TIMEOUT);
 
-            // Step 1: Read initial request (CONNECT or CONNECT_ADMIN)
-            Object initialRequestObject = in.readObject();
-            if (!(initialRequestObject instanceof Request initialRequest)) {
-                sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Invalid request object.");
-                return;
-            }
+            try (ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream())) {
 
-            boolean isAdmin = false;
+                System.out.println("📡 Connection established with " + clientId);
 
-            if ("CONNECT_ADMIN".equalsIgnoreCase(initialRequest.getType())) {
-                isAdmin = true;
-            } else if (!"CONNECT".equalsIgnoreCase(initialRequest.getType())) {
-                sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Expected CONNECT or CONNECT_ADMIN.");
-                return;
-            }
-
-            System.out.println("📨 Initial Request: " + initialRequest.getType() + " from " + clientSocket.getInetAddress().getHostAddress());
-
-            assignedBranch = branchManager.assignBranch(clientId, clientSocket.getInetAddress(), isAdmin);
-            sendResponse(out, Response.Status.SUCCESS, assignedBranch, "Connected to branch: " + assignedBranch.name());
-
-            // Step 3: Loop to process ongoing requests
-            while (true) {
-                Request request = (Request) in.readObject();
-                System.out.println("📨 Request: " + request.getType() + " from " + assignedBranch.name());
-
-                if ("EXIT".equalsIgnoreCase(request.getType())) {
-                    break;
+                // Step 1: Read initial request (CONNECT or CONNECT_ADMIN)
+                Object initialRequestObject = in.readObject();
+                if (!(initialRequestObject instanceof Request initialRequest)) {
+                    sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Invalid request object.");
+                    return;
                 }
 
-                Response response = processRequest(request);
-                out.writeObject(response);
-                out.flush();
+                boolean isAdmin = false;
+
+                if ("CONNECT_ADMIN".equalsIgnoreCase(initialRequest.getType())) {
+                    isAdmin = true;
+                } else if (!"CONNECT".equalsIgnoreCase(initialRequest.getType())) {
+                    sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Expected CONNECT or CONNECT_ADMIN.");
+                    return;
+                }
+
+                System.out.println("📨 Initial Request: " + initialRequest.getType() + " from " + clientSocket.getInetAddress().getHostAddress());
+
+                try {
+                    assignedBranch = branchManager.assignBranch(clientId, clientSocket.getInetAddress(), isAdmin);
+                    sendResponse(out, Response.Status.SUCCESS, assignedBranch, "Connected to branch: " + assignedBranch.name());
+                } catch (IOException e) {
+                    sendResponse(out, Response.Status.ERROR, null, e.getMessage());
+                    return;
+                }
+
+                // Step 3: Loop to process ongoing requests
+                while (true) {
+                    try {
+                        Request request = (Request) in.readObject();
+                        System.out.println("📨 Request: " + request.getType() + " from " + assignedBranch.name());
+
+                        if ("EXIT".equalsIgnoreCase(request.getType())) {
+                            break;
+                        }
+
+                        Response response = processRequest(request);
+                        out.writeObject(response);
+                        out.flush();
+                    } catch (java.net.SocketTimeoutException e) {
+                        System.out.println("⏰ Client timeout: " + clientId);
+                        break;
+                    } catch (java.io.EOFException e) {
+                        System.out.println("🔌 Client disconnected: " + clientId);
+                        break;
+                    }
+                }
             }
         } catch (Exception e) {
-            System.err.println("❌ Client error: " + e.getMessage());
+            System.err.println("❌ Client error (" + clientId + "): " + e.getMessage());
         } finally {
             cleanup();
         }
     }
-
 
     private Response processRequest(Request request) {
         try {

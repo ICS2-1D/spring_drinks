@@ -14,27 +14,61 @@
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
           },
+          colors: {
+            // Define custom colors for our dark theme and turquoise accents
+            'dark-bg': '#1a202c', // Very dark gray/almost black for the body background
+            'dark-card': '#2d3748', // Slightly lighter dark for the main content card
+            'light-text': '#e2e8f0', // Light gray for general text on dark backgrounds
+            'custom-turquoise': '#40E0D0', // A vibrant turquoise for highlights and buttons
+            'dark-highlight': '#4a5568', // For subtle borders or shadows on dark elements
+          }
         }
       }
     }
   </script>
-</head>
-<body class="bg-gray-100 font-sans antialiased flex items-center justify-center min-h-screen">
+  <style>
+    /* Custom styles for the scrollbar, applying to all scrollable elements */
+    /* This is generally good practice for dark themes to ensure scrollbars match */
+    ::-webkit-scrollbar {
+      width: 8px; /* Width of the scrollbar */
+    }
 
-<div class="bg-white p-10 rounded-xl shadow-lg text-center max-w-md w-full">
-  <h1 class="text-4xl font-extrabold text-gray-800 mb-6">Welcome to Spring Drinks! 🍹</h1>
-  <p class="text-xl text-gray-700 mb-8">Are you an Administrator?</p>
+    ::-webkit-scrollbar-track {
+      background: #2d3748; /* Darker track color */
+      border-radius: 10px; /* Rounded corners for the track */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #4a5568; /* Darker thumb color */
+      border-radius: 10px; /* Rounded corners for the thumb */
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #40E0D0; /* Turquoise thumb on hover */
+    }
+  </style>
+</head>
+<!-- Apply dark background and light text to the body -->
+<body class="bg-dark-bg font-sans antialiased flex items-center justify-center min-h-screen text-light-text">
+
+<!-- Main content container, now with a dark card background and subtle border -->
+<div class="bg-dark-card p-10 rounded-xl shadow-lg text-center max-w-md w-full border border-dark-highlight">
+  <!-- Heading with turquoise color. The emoji's color cannot be controlled by CSS,
+       but the surrounding text color will make it pop within the theme. -->
+  <h1 class="text-4xl font-extrabold text-custom-turquoise mb-6">Welcome to Spring Drinks! <span class="text-custom-turquoise">🍹</span></h1>
+  <!-- Paragraph text is now light for contrast -->
+  <p class="text-xl text-light-text mb-8">Are you an Administrator?</p>
 
   <div class="flex flex-col space-y-6">
-    <!-- Button for Administrator -->
+    <!-- Button for Administrator, now with turquoise background -->
     <a href="admin.html"
-       class="inline-block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg text-2xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+       class="inline-block w-full bg-custom-turquoise hover:bg-opacity-80 text-dark-card font-bold py-4 px-6 rounded-lg text-2xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-custom-turquoise focus:ring-offset-2 focus:ring-offset-dark-card">
       Yes, I am an Admin
     </a>
 
-    <!-- Button for Customer -->
+    <!-- Button for Customer, also with turquoise background -->
     <a href="customer.html"
-       class="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg text-2xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+       class="inline-block w-full bg-custom-turquoise hover:bg-opacity-80 text-dark-card font-bold py-4 px-6 rounded-lg text-2xl shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-custom-turquoise focus:ring-offset-2 focus:ring-offset-dark-card">
       No, I'm a Customer
     </a>
   </div>

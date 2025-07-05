@@ -19,19 +19,19 @@ function displayMessage(message, type) {
     messageBox.textContent = message; // Set the message text
     // Remove previous styling classes
     messageBox.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
-    // Add new styling based on message type
+    // Add new styling based on message type, using the new dark theme colors
     if (type === 'success') {
-        messageBox.classList.add('bg-green-100', 'text-green-800');
+        messageBox.classList.add('bg-green-800', 'text-green-200'); // Darker green background, lighter text
     } else if (type === 'error') {
-        messageBox.classList.add('bg-red-100', 'text-red-800');
+        messageBox.classList.add('bg-red-800', 'text-red-200'); // Darker red background, lighter text
     } else { // Default to info styling
-        messageBox.classList.add('bg-blue-100', 'text-blue-800');
+        messageBox.classList.add('bg-custom-turquoise', 'text-dark-card'); // Turquoise background, dark text
     }
     messageBox.classList.remove('hidden'); // Make the message box visible
 
     // Hide the message after 5 seconds
     setTimeout(() => {
-        messageBox.classList.add('hidden');
+        boxElement.classList.add('hidden');
     }, 5000);
 }
 
@@ -39,7 +39,8 @@ function displayMessage(message, type) {
  * Fetches all available drinks from the backend API and displays them.
  */
 async function fetchDrinks() {
-    drinksListDiv.innerHTML = '<p class="col-span-full text-center text-gray-500">Loading drinks...</p>'; // Show loading message
+    // Updated loading message color for dark theme
+    drinksListDiv.innerHTML = '<p class="col-span-full text-center text-light-text">Loading drinks...</p>'; // Show loading message
     try {
         const response = await fetch('/drinks'); // Make GET request to /drinks endpoint
         if (!response.ok) {
@@ -50,7 +51,8 @@ async function fetchDrinks() {
         renderDrinks(); // Call function to render the fetched drinks
     } catch (error) {
         console.error('Error fetching drinks:', error);
-        drinksListDiv.innerHTML = '<p class="col-span-full text-center text-red-500">Failed to load drinks. Please try again later.</p>';
+        // Updated error message color for dark theme
+        drinksListDiv.innerHTML = '<p class="col-span-full text-center text-red-400">Failed to load drinks. Please try again later.</p>';
         displayMessage('Failed to load drinks. Check console for details.', 'error');
     }
 }
@@ -61,21 +63,23 @@ async function fetchDrinks() {
 function renderDrinks() {
     drinksListDiv.innerHTML = ''; // Clear existing content
     if (allDrinks.length === 0) {
-        drinksListDiv.innerHTML = '<p class="col-span-full text-center text-gray-500">No drinks available at the moment.</p>';
+        // Updated empty message color for dark theme
+        drinksListDiv.innerHTML = '<p class="col-span-full text-center text-light-text">No drinks available at the moment.</p>';
         return;
     }
 
     allDrinks.forEach(drink => {
         // Create a card element for each drink
         const drinkCard = document.createElement('div');
-        drinkCard.className = 'bg-white rounded-xl shadow-lg p-5 border border-gray-200 flex flex-col justify-between transform hover:scale-105 transition duration-300 ease-in-out';
+        // Updated card background, shadow, and border for dark theme
+        drinkCard.className = 'bg-dark-card rounded-xl shadow-lg p-5 border border-dark-highlight flex flex-col justify-between transform hover:scale-105 transition duration-300 ease-in-out';
         drinkCard.innerHTML = `
             <div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">${drink.drinkName}</h3>
-                <p class="text-gray-600 mb-3">Price: <span class="font-bold text-red-700">KSH ${drink.drinkPrice.toFixed(2)}</span></p>
-                <p class="text-gray-600 mb-4">Available: <span class="font-medium ${drink.drinkQuantity > 0 ? 'text-green-600' : 'text-red-600'}">${drink.drinkQuantity}</span></p>
+                <h3 class="text-xl font-semibold text-light-text mb-2">🥤 ${drink.drinkName}</h3> <!-- Added drink emoji here -->
+                <p class="text-light-text mb-3">Price: <span class="font-bold text-custom-turquoise">KSH ${drink.drinkPrice.toFixed(2)}</span></p>
+                <p class="text-light-text mb-4">Available: <span class="font-medium ${drink.drinkQuantity > 0 ? 'text-green-400' : 'text-red-400'}">${drink.drinkQuantity}</span></p>
             </div>
-            <button class="add-to-cart-btn mt-4 w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 transition duration-300 ease-in-out ${drink.drinkQuantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+            <button class="add-to-cart-btn mt-4 w-full bg-custom-turquoise hover:bg-opacity-80 text-dark-card font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-turquoise focus:ring-offset-2 focus:ring-offset-dark-card transition duration-300 ease-in-out ${drink.drinkQuantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
                     data-drink-id="${drink.id}"
                     ${drink.drinkQuantity === 0 ? 'disabled' : ''}>
                 ${drink.drinkQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -134,7 +138,7 @@ function addToCart(event) {
 
 /**
  * Removes or decreases the quantity of a drink from the cart.
- * @param {number} drinkIdToRemove - The ID of the drink to remove/decrease.
+ * @param {number} drinkIdToUpdate - The ID of the drink to remove/decrease.
  * @param {boolean} removeAll - If true, removes all quantity of the item; otherwise, decreases by one.
  */
 function updateCartItemQuantity(drinkIdToUpdate, action = 'increase') {
@@ -173,22 +177,24 @@ function updateCartDisplay() {
     cartItemsDiv.innerHTML = ''; // Clear current cart display
 
     if (cart.length === 0) {
+        // Updated empty cart message color for dark theme
         emptyCartMessage.classList.remove('hidden'); // Show "cart is empty" message
     } else {
         emptyCartMessage.classList.add('hidden'); // Hide "cart is empty" message
         cart.forEach(item => {
             const cartItemElement = document.createElement('div');
-            cartItemElement.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg mb-2 shadow-sm';
+            // Updated cart item background and shadow for dark theme
+            cartItemElement.className = 'flex items-center justify-between bg-dark-highlight p-3 rounded-lg mb-2 shadow-sm border border-dark-highlight';
             cartItemElement.innerHTML = `
                 <div class="flex-grow">
-                    <p class="font-semibold text-gray-800">${item.name}</p>
-                    <p class="text-gray-600 text-sm">KSH ${item.price.toFixed(2)} x ${item.quantity}</p>
+                    <p class="font-semibold text-light-text">🥤 ${item.name}</p> <!-- Added drink emoji here -->
+                    <p class="text-light-text text-sm">KSH ${item.price.toFixed(2)} x ${item.quantity}</p>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded-full text-lg leading-none" data-id="${item.drinkId}" data-action="decrease">-</button>
-                    <span class="font-bold text-gray-900">${item.quantity}</span>
-                    <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded-full text-lg leading-none" data-id="${item.drinkId}" data-action="increase">+</button>
-                    <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded-lg text-sm" data-id="${item.drinkId}" data-action="remove">Remove</button>
+                    <button class="bg-dark-input-bg hover:bg-custom-turquoise text-light-text font-bold py-1 px-2 rounded-full text-lg leading-none transition duration-200" data-id="${item.drinkId}" data-action="decrease">-</button>
+                    <span class="font-bold text-custom-turquoise">${item.quantity}</span>
+                    <button class="bg-dark-input-bg hover:bg-custom-turquoise text-light-text font-bold py-1 px-2 rounded-full text-lg leading-none transition duration-200" data-id="${item.drinkId}" data-action="increase">+</button>
+                    <button class="bg-red-800 hover:bg-red-700 text-light-text font-bold py-1 px-2 rounded-lg text-sm transition duration-200" data-id="${item.drinkId}" data-action="remove">Remove</button>
                 </div>
             `;
             cartItemsDiv.appendChild(cartItemElement);
@@ -265,6 +271,8 @@ async function handleOrderSubmission(event) {
             cart = [];
             updateCartDisplay();
             orderForm.reset(); // Reset the form fields
+            // After successful order and payment, re-fetch drinks to update stock display
+            fetchDrinks();
         } else {
             // Handle HTTP errors or backend validation errors
             const errorMessage = responseData.message || 'Failed to place order.';
@@ -273,7 +281,7 @@ async function handleOrderSubmission(event) {
         }
     } catch (error) {
         console.error('Network or unexpected error during order placement:', error);
-        displayMessage('An unexpected error occurred. Please try again.', 'error');
+        displayMessage('An unexpected error occurred during payment. Please check your order status later.', 'error');
     }
 }
 
@@ -316,4 +324,4 @@ async function simulatePayment(orderId, customerPhoneNumber) {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', fetchDrinks); // Fetch drinks when the page loads
-orderForm.addEventListener('submit', handleOrderSubmission); // Handle form submission
+orderForm.addEventListener('submit', handleOrderSubmission); // Handle form submiss

@@ -17,13 +17,9 @@ public class ClientCli {
 
       public static void main(String[] args) {
             System.out.println("=== WELCOME TO SPRING DRINKS ===");
-
-            // Connect to server
             try {
                   client = new SocketClient();
                   client.connect();
-
-                  // Get branch assignment
                   Response response = client.sendRequest(new Request("CONNECT", null));
                   if (response.getStatus() == Response.Status.SUCCESS) {
                         branch = (Branch) response.getData();
@@ -36,16 +32,11 @@ public class ClientCli {
                   System.out.println("Could not connect to server: " + e.getMessage());
                   return;
             }
-
-            // Main menu loop
             runMainMenu();
-
-            // Clean up
             client.disconnect();
       }
 
       private static void runMainMenu() {
-            // Get customer info
             System.out.print("Enter your name: ");
             String customerName = scanner.nextLine();
             System.out.print("Enter your phone: ");
@@ -69,28 +60,21 @@ public class ClientCli {
                         System.out.println("Invalid choice, try again");
                   }
             }
-
             System.out.println("Thank you for visiting!");
       }
 
       private static void orderDrinks(String customerName, String customerPhone) {
-            // Get available drinks
             List<DrinkDto> drinks = getDrinks();
             if (drinks == null || drinks.isEmpty()) {
                   System.out.println("No drinks available right now");
                   return;
             }
-
-            // Show menu
             System.out.println("\n=== DRINKS MENU ===");
             for (int i = 0; i < drinks.size(); i++) {
                   DrinkDto drink = drinks.get(i);
                   System.out.println((i + 1) + ". " + drink.getDrinkName() + " - ksh " + drink.getDrinkPrice());
             }
-
-            // Let customer pick drinks
             List<OrderItemRequest> orderItems = new ArrayList<>();
-
             while (true) {
                   System.out.print("\nPick a drink number (or 0 to finish): ");
                   try {
@@ -127,22 +111,16 @@ public class ClientCli {
                         System.out.println("Please enter a valid number");
                   }
             }
-
             if (orderItems.isEmpty()) {
                   System.out.println("No items in order");
                   return;
             }
-
-            // Show order summary and confirm
             showOrderSummary(orderItems, drinks);
-
             System.out.print("\nConfirm order? (yes/no): ");
             if (!scanner.nextLine().equalsIgnoreCase("yes")) {
                   System.out.println("Order cancelled");
                   return;
             }
-
-            // Place the order
             placeOrder(customerName, customerPhone, orderItems);
       }
 
@@ -163,7 +141,6 @@ public class ClientCli {
             double total = 0;
 
             for (OrderItemRequest item : orderItems) {
-                  // Find the drink details
                   DrinkDto drink = drinks.stream()
                           .filter(d -> d.getId().equals(item.getDrinkId()))
                           .findFirst()
@@ -186,7 +163,7 @@ public class ClientCli {
             orderRequest.setBranch(branch);
             orderRequest.setItems(orderItems);
 
-            // Send order to server
+
             Request createOrderRequest = new Request("CREATE_ORDER", orderRequest);
             Response orderResponse = client.sendRequest(createOrderRequest);
 
@@ -195,11 +172,10 @@ public class ClientCli {
                   System.out.println("\nORDER PLACED! Order #" + orderData.getOrderNumber());
                   System.out.println("Processing and recording payment...");
 
-                  // --- PAYMENT RECORDING LOGIC ---
                   Map<String, Object> paymentData = new HashMap<>();
                   paymentData.put("orderId", orderData.getOrderId());
                   paymentData.put("customerNumber", customerPhone);
-                  paymentData.put("paymentMethod", "M-PESA"); // Or any other method
+                  paymentData.put("paymentMethod", "M-PESA");
                   paymentData.put("paymentStatus", "SUCCESS");
 
                   Request createPaymentRequest = new Request("CREATE_PAYMENT", paymentData);
@@ -210,7 +186,6 @@ public class ClientCli {
                   } else {
                         System.out.println("❌ Critical Error: Order was placed, but payment recording failed: " + paymentResponse.getMessage());
                   }
-                  // --- END OF PAYMENT LOGIC ---
 
             } else {
                   System.out.println("Order failed: " + orderResponse.getMessage());

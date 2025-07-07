@@ -5,35 +5,25 @@ import com.ics.dtos.RegisterRequest;
 import com.ics.dtos.SalesReportDto;
 import com.ics.dtos.Request;
 import com.ics.dtos.Response;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
 public class AdminCli {
-
-    // Socket client for communication with HQ server
     private static final SocketClient socketClient = new SocketClient("localhost", 9999);
-
-    // Request type constants
     private static final String LOGIN_ADMIN = "LOGIN_ADMIN";
     private static final String REGISTER_ADMIN = "REGISTER_ADMIN";
     private static final String GET_ALL_DRINKS = "GET_ALL_DRINKS";
     private static final String UPDATE_DRINK = "UPDATE_DRINK";
     private static final String GET_SALES_REPORT = "GET_SALES_REPORT";
-    private static final String SYNC_TO_HQ = "SYNC_TO_HQ";
-
-    // Re-usable components
     private static final Scanner scanner = new Scanner(System.in);
     private static boolean isLoggedIn = false;
-    private static String authToken = "";
 
     public static void main(String[] args) {
-        System.out.println("🍹====================================🍹");
         System.out.println("  ADMINISTRATOR COMMAND LINE INTERFACE");
-        System.out.println("🍹====================================🍹");
 
+        //noinspection InfiniteLoopStatement
         while (true) {
             if (!isLoggedIn) {
                 showAuthMenu();
@@ -44,7 +34,7 @@ public class AdminCli {
     }
 
     private static void showAuthMenu() {
-        System.out.println("\n--- Authentication ---");
+        System.out.println("\nAuthentication");
         System.out.println("1. 🔐 Login");
         System.out.println("2. 📝 Signup");
         System.out.println("0. 🚪 Exit");
@@ -73,10 +63,8 @@ public class AdminCli {
         System.out.println("\n--- Main Menu ---");
         System.out.println("1. 📦 View Stock");
         System.out.println("2. 💰 Update Drink Prices");
-        System.out.println("3. 🏪 Set Branch Info");
-        System.out.println("4. 📊 View Sales Report");
-        System.out.println("5. ☁️ Sync to HQ");
-        System.out.println("6. 🚪 Logout");
+        System.out.println("3. 📊 View Sales Report");
+        System.out.println("4. 🚪 Logout");
         System.out.print("Choose an option: ");
 
         String choice = scanner.nextLine();
@@ -89,16 +77,9 @@ public class AdminCli {
                 updateDrinkDetails();
                 break;
             case "3":
-                // setBranchInfo(); // TODO: Implement later
-                System.out.println("🚧 Feature coming soon!");
-                break;
-            case "4":
                 viewSalesReport();
                 break;
-            case "5":
-                syncToHq();
-                break;
-            case "6":
+            case "4":
                 logout();
                 break;
             default:
@@ -119,7 +100,6 @@ public class AdminCli {
 
         if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
             isLoggedIn = true;
-            authToken = (String) serviceResponse.getData(); // Assuming token is returned in data
             System.out.println("✅ Login successful! Welcome, " + username + ".");
         } else {
             System.out.println("❌ Login failed: " + serviceResponse.getMessage());
@@ -129,7 +109,7 @@ public class AdminCli {
     private static void signup() {
         System.out.println("\n--- 📝 Admin Signup ---");
         System.out.print("Enter new username: ");
-        String username = scanner.nextLine();
+        var username = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
@@ -146,7 +126,6 @@ public class AdminCli {
 
     private static void logout() {
         isLoggedIn = false;
-        authToken = "";
         System.out.println("\n✅ You have been logged out.");
     }
 
@@ -159,7 +138,6 @@ public class AdminCli {
         if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
             @SuppressWarnings("unchecked")
             List<DrinkDto> drinks = (List<DrinkDto>) serviceResponse.getData();
-
             System.out.println("----------------------------------------");
             System.out.printf("%-20s | %-10s%n", "Drink Name", "Quantity");
             System.out.println("----------------------------------------");
@@ -174,14 +152,11 @@ public class AdminCli {
 
     private static void updateDrinkDetails() {
         System.out.println("\n--- 💰 Update Drink Prices & Quantities ---");
-
-        // First, fetch and display drinks so admin can choose one
         List<DrinkDto> drinks = getDrinksMenu();
         if (drinks == null || drinks.isEmpty()) {
             System.out.println("No drinks found to update.");
             return;
         }
-
         System.out.println("--- Available Drinks ---");
         System.out.printf("%-5s %-20s %-10s %-10s%n", "ID", "Name", "Price", "Quantity");
         System.out.println("-----------------------------------------------------");
@@ -193,7 +168,6 @@ public class AdminCli {
                     drink.getDrinkQuantity());
         }
         System.out.println("-----------------------------------------------------");
-
         System.out.print("Enter Drink ID to update: ");
         String drinkId = scanner.nextLine();
 
@@ -203,7 +177,6 @@ public class AdminCli {
         System.out.print("Enter new quantity (or press Enter to keep current): ");
         String newQuantity = scanner.nextLine().trim();
 
-        // Check if user wants to update anything
         if (newPrice.isEmpty() && newQuantity.isEmpty()) {
             System.out.println("No changes specified. Operation cancelled.");
             return;
@@ -211,9 +184,7 @@ public class AdminCli {
 
         Map<String, Object> updateData = new HashMap<>();
         updateData.put("drinkId", drinkId);
-        updateData.put("authToken", authToken);
 
-        // Only add fields that user wants to update
         if (!newPrice.isEmpty()) {
             try {
                 double price = Double.parseDouble(newPrice);
@@ -268,7 +239,6 @@ public class AdminCli {
         System.out.println("\n--- 📊 Sales Report ---");
 
         Map<String, Object> reportRequest = new HashMap<>();
-        reportRequest.put("authToken", authToken);
 
         Request serviceRequest = new Request(GET_SALES_REPORT, reportRequest);
         Response serviceResponse = socketClient.sendRequest(serviceRequest);
@@ -286,7 +256,6 @@ public class AdminCli {
                 System.out.printf("%-25s | %-10s | %-12s%n", "Drink Name", "Quantity", "Total Sales");
                 System.out.println("-------------------------------------------------");
 
-                // Sort by total sales (descending) for better readability
                 report.getDrinksSold().entrySet().stream()
                         .sorted((e1, e2) -> Double.compare(e2.getValue().getTotalPrice(), e1.getValue().getTotalPrice()))
                         .forEach(entry -> {
@@ -303,24 +272,6 @@ public class AdminCli {
             System.out.println("=================================================");
         } else {
             System.out.println("❌ Failed to generate sales report: " + serviceResponse.getMessage());
-        }
-    }
-
-    private static void syncToHq() {
-        System.out.println("\n--- ☁️ Sync to HQ ---");
-        System.out.println("Syncing local data to central server...");
-
-        Map<String, Object> syncData = new HashMap<>();
-        syncData.put("authToken", authToken);
-        syncData.put("branchId", "NAIROBI"); // Could be made configurable
-
-        Request serviceRequest = new Request(SYNC_TO_HQ, syncData);
-        Response serviceResponse = socketClient.sendRequest(serviceRequest);
-
-        if (serviceResponse.getStatus() == Response.Status.SUCCESS) {
-            System.out.println("✅ Data successfully synced to HQ!");
-        } else {
-            System.out.println("❌ HQ sync failed: " + serviceResponse.getMessage());
         }
     }
 }

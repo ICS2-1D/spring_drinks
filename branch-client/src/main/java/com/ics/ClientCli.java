@@ -8,7 +8,6 @@ import com.ics.dtos.Request;
 import com.ics.dtos.Response;
 import com.ics.models.Branch;
 import com.ics.models.Customer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,45 +15,29 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class ClientCli {
-
-    // Socket client for communication with HQ server
     private static final SocketClient socketClient = new SocketClient("localhost", 9999);
-
-    // Request type constants
     private static final String GET_ALL_DRINKS = "GET_ALL_DRINKS";
     private static final String CREATE_ORDER = "CREATE_ORDER";
     private static final String UPDATE_ORDER_STATUS = "UPDATE_ORDER_STATUS";
     private static final String CREATE_PAYMENT = "CREATE_PAYMENT";
-
-    // Re-usable components
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        System.out.println("🍹====================================🍹");
         System.out.println("      WELCOME TO SPRING DRINKS!");
-        System.out.println("🍹====================================🍹");
-
-        // Ask if the user is an admin
         System.out.print("Are you an admin? (yes/no): ");
         String adminChoice = scanner.nextLine();
 
         if ("yes".equalsIgnoreCase(adminChoice)) {
-            // If user is an admin, run the Admin CLI
             AdminCli.main(args);
         } else {
-            // If user is a client, proceed with client flow
             runClientCli();
         }
     }
 
     private static void runClientCli() {
-        // 1. Welcome the user and register them in the system.
         Customer customer = welcomeCustomer();
-
-        System.out.println("\n✅ Welcome, " + customer.getCustomer_name());
-
+        System.out.println("\n Welcome, " + customer.getCustomer_name());
         while (true) {
-            // 2. Main menu loop
             System.out.println("\nWhat would you like to do?");
             System.out.println("1. 🍹 Browse Drinks & Place Order");
             System.out.println("0. 🚪 Exit");
@@ -63,7 +46,6 @@ public class ClientCli {
             String choice = scanner.nextLine();
 
             if ("1".equals(choice)) {
-                // 3. Start the ordering process
                 placeOrder(customer);
             } else if ("0".equals(choice)) {
                 break;
@@ -71,7 +53,6 @@ public class ClientCli {
                 System.out.println("❌ Invalid choice. Please try again.");
             }
         }
-
         System.out.println("\nThank you for visiting! Have a great day! 🎉");
     }
 
@@ -88,14 +69,11 @@ public class ClientCli {
     }
 
     private static void placeOrder(Customer customer) {
-        // Get the list of available drinks from the API
         List<DrinkDto> availableDrinks = getDrinksMenu();
         if (availableDrinks == null || availableDrinks.isEmpty()) {
             System.out.println("Sorry, no drinks are available at the moment.");
             return;
         }
-
-        // Display the menu - REMOVED Stock for clients
         System.out.println("\n--- 🍹 DRINKS MENU 🍹 ---");
         System.out.printf("%-5s %-20s %-10s%n", "ID", "Drink Name", "Price");
         System.out.println("---------------------------------------");
@@ -106,7 +84,6 @@ public class ClientCli {
         }
         System.out.println("---------------------------------------");
 
-        // Let user add items to their cart
         Map<Long, OrderItemRequest> cart = new HashMap<>();
         while (true) {
             System.out.print("\nEnter Drink ID to add to cart (or type 'done' to checkout): ");
@@ -129,7 +106,6 @@ public class ClientCli {
                 if (quantity <= 0) {
                     System.out.println("❌ Quantity must be positive.");
                 } else {
-                    // We can add a check here against available stock if we want, even if not displayed
                     OrderItemRequest item = new OrderItemRequest(drinkId, quantity);
                     cart.put(drinkId, item);
                     System.out.println("✅ Added to cart!");
@@ -143,8 +119,6 @@ public class ClientCli {
             System.out.println("Cart is empty. Returning to main menu.");
             return;
         }
-
-        // Checkout process
         checkout(customer, new ArrayList<>(cart.values()), drinksMap);
     }
 
@@ -210,7 +184,6 @@ public class ClientCli {
             Thread.sleep(1500);
             System.out.println("✅ Payment Approved!");
 
-            // Update order status
             Map<String, Object> statusUpdate = new HashMap<>();
             statusUpdate.put("orderId", orderId);
             statusUpdate.put("orderStatus", "COMPLETED");
@@ -222,7 +195,6 @@ public class ClientCli {
                 System.out.println("⚠️ Warning: Could not update order status");
             }
 
-            // Now simulate the payment record
             Map<String, Object> paymentData = new HashMap<>();
             paymentData.put("orderId", orderId);
             paymentData.put("customerNumber", phoneNumber);

@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/reports") // Using a common base path like /api is good practice
+@RequestMapping("/reports") // Using a common base path like /api is good practice
 @RequiredArgsConstructor
 public class ReportController {
 

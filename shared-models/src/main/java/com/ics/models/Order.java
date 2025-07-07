@@ -31,8 +31,10 @@ public class Order implements Serializable {
     @Column(name = "branch")
     private Branch branch;
 
-    @Embedded
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
     private Customer customer;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status")

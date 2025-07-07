@@ -18,9 +18,6 @@ public class AdminCli {
     private static boolean isLoggedIn = false;
     private static String authToken = "";
 
-    // ... main, runMainMenu, showLoginMenu, login, createAccount, logout methods remain the same ...
-
-    // main method from your provided AdminCli.java
     public static void main(String[] args) {
         System.out.println("=== ADMIN CONSOLE ===");
         try {
@@ -218,10 +215,6 @@ public class AdminCli {
         return (response.getStatus() == Response.Status.SUCCESS) ? (List<DrinkDto>) response.getData() : null;
     }
 
-    /**
-     * Main menu for viewing sales reports. Gives the admin a choice
-     * between a consolidated report and a branch-specific one.
-     */
     private static void viewSalesReport() {
         System.out.println("\n=== SALES REPORT MENU ===");
         System.out.println("1. Consolidated Report (All Branches)");
@@ -244,13 +237,8 @@ public class AdminCli {
         }
     }
 
-    /**
-     * Fetches and displays the consolidated sales report for all branches.
-     */
     private static void getConsolidatedReport() {
         Map<String, Object> reportData = new HashMap<>();
-        reportData.put("authToken", authToken);
-        // No "branch" key is sent, so the backend knows to generate a consolidated report.
 
         Request request = new Request("GET_SALES_REPORT", reportData);
         Response response = client.sendRequest(request);
@@ -263,9 +251,6 @@ public class AdminCli {
         }
     }
 
-    /**
-     * Prompts the admin to select a branch and fetches the report for it.
-     */
     private static void getSingleBranchReport() {
         System.out.println("\nSelect a branch to generate a report for:");
         Branch[] branches = Branch.values();
@@ -302,10 +287,6 @@ public class AdminCli {
         }
     }
 
-    /**
-     * Displays a well-formatted consolidated sales report.
-     * @param report The consolidated report DTO.
-     */
     private static void displayConsolidatedReport(ConsolidatedSalesReportDto report) {
         System.out.println("\n=============================================");
         System.out.println("==      CONSOLIDATED SALES REPORT      ==");
@@ -326,10 +307,6 @@ public class AdminCli {
         System.out.println("=============================================");
     }
 
-    /**
-     * Reusable method to display the details of a single report (either for a branch or as part of a consolidated report).
-     * @param report A standard SalesReportDto.
-     */
     private static void displaySingleReport(SalesReportDto report) {
         System.out.printf("Total Branch Sales: ksh %.2f%n", report.getTotalSales());
 
@@ -356,7 +333,6 @@ public class AdminCli {
         System.out.println("\n=== CUSTOMER MODE ===\nPlacing order from " + branch.name() + " branch");
         Customer adminCustomer = new Customer();
         adminCustomer.setCustomer_name("Admin Customer");
-        adminCustomer.setCustomer_phone_number("0700000000");
-        // Simplified order placement for admin
+        adminCustomer.setCustomerPhoneNumber("0700000000");
     }
 }

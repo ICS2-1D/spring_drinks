@@ -1,11 +1,19 @@
 package com.ics.spring_drinks;
 
-import com.ics.dtos.*;
+import com.ics.dtos.DrinkDto;
+import com.ics.dtos.OrderRequest;
+import com.ics.dtos.OrderResponse;
+import com.ics.dtos.PaymentRequest;
+import com.ics.dtos.PaymentResponse;
+import com.ics.dtos.RegisterRequest;
+import com.ics.dtos.Request;
+import com.ics.dtos.Response;
 import com.ics.models.Branch;
 import com.ics.models.OrderStatus;
 
-
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
@@ -148,9 +156,13 @@ public class ClientHandler implements Runnable {
 
     private Response handleAddDrink(Request request) {
         if (!isAdminBranch()) return adminOnlyError();
-        DrinkDto drink = createDrinkFromMap((Map<String, Object>) request.getPayload());
-        DrinkDto result = services.drinkService().createDrink(drink);
-        return successResponse(result, "Drink added successfully");
+        try {
+            DrinkDto drink = createDrinkFromMap((Map<String, Object>) request.getPayload());
+            DrinkDto result = services.drinkService().createDrink(drink);
+            return successResponse(result, "Drink added successfully");
+        } catch (IllegalArgumentException e) {
+            return errorResponse(e.getMessage());
+        }
     }
 
     private Response handleUpdateDrink(Request request) {
@@ -226,8 +238,30 @@ public class ClientHandler implements Runnable {
         out.flush();
     }
 
+    /**
+     * CORRECTED: This method is now robust and validates the incoming data.
+     * It checks for the existence of required keys and handles potential exceptions.
+     */
     private DrinkDto createDrinkFromMap(Map<String, Object> data) {
-        return new DrinkDto(null, data.get("drinkName").toString(), Integer.parseInt(data.get("drinkQuantity").toString()), Double.parseDouble(data.get("drinkPrice").toString()), null);
+        if (data == null || !data.containsKey("drinkName") || !data.containsKey("drinkPrice") || !data.containsKey("drinkQuantity")) {
+            throw new IllegalArgumentException("Payload for creating a drink must contain drinkName, drinkPrice, and drinkQuantity.");
+        }
+        try {
+            String drinkName = data.get("drinkName").toString();
+            if (drinkName == null || drinkName.trim().isEmpty()) {
+                throw new IllegalArgumentException("Drink name cannot be empty.");
+            }
+            int quantity = Integer.parseInt(data.get("drinkQuantity").toString());
+            double price = Double.parseDouble(data.get("drinkPrice").toString());
+
+            if (price < 0 || quantity < 0) {
+                throw new IllegalArgumentException("Price and quantity cannot be negative.");
+            }
+
+            return new DrinkDto(null, drinkName, quantity, price, null);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid number format for price or quantity.", e);
+        }
     }
 
     private DrinkDto createDrinkUpdateFromMap(Map<String, Object> data) {
@@ -249,7 +283,6 @@ public class ClientHandler implements Runnable {
     private void cleanup() {
         try {
             if (assignedBranch != null) {
-                // MODIFIED: Call unassignBranch with the socket's InetAddress for proper removal from the IP map.
                 System.out.println("🧹 Cleaning up TCP client and unassigning branch for IP: " + clientSocket.getInetAddress().getHostAddress());
                 branchManager.unassignBranch(clientSocket.getInetAddress());
             }

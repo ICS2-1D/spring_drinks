@@ -71,15 +71,15 @@ public class OrderServiceImpl implements OrderService {
             branchStock.setQuantity(branchStock.getQuantity() - itemRequest.getQuantity());
             branchStockRepository.save(branchStock);
 
-            if (branchStock.getQuantity() <= branchStock.getLowStockThreshold()) {
-                System.out.println("LOW STOCK ALERT at " + request.getBranch() + " for " + drink.getDrinkName() + ". Current stock: " + branchStock.getQuantity());
-                RestockRequest restockRequest = new RestockRequest();
-                restockRequest.setBranch(request.getBranch());
-                restockRequest.setDrink(drink);
-                restockRequest.setRequestedQuantity(50); // Default restock quantity
-                restockRequest.setRequestDate(LocalDateTime.now());
-                restockRequestRepository.save(restockRequest);
-            }
+                if (branchStock.getQuantity() <= branchStock.getLowStockThreshold()) {
+                    System.out.println("LOW STOCK ALERT at " + request.getBranch() + " for " + drink.getDrinkName() + ". Current stock: " + branchStock.getQuantity());
+                    RestockRequest restockRequest = new RestockRequest();
+                    restockRequest.setBranch(request.getBranch());
+                    restockRequest.setDrink(drink);
+                    restockRequest.setRequestedQuantity(50); // Default restock quantity
+                    restockRequest.setRequestDate(LocalDateTime.now());
+                    restockRequestRepository.save(restockRequest);
+                }
         }
 
         order.setItems(orderItems);

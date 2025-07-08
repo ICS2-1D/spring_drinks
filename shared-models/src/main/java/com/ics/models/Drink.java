@@ -21,11 +21,8 @@ public class Drink implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Column(unique = true,name ="drink_name")
+    @Column(unique = true, name ="drink_name")
     private String drinkName;
-
-    @Column(name = "drink_quantity")
-    private int drinkQuantity;
 
     @Column(name = "drink_price")
     private double drinkPrice;
@@ -33,4 +30,8 @@ public class Drink implements Serializable {
     @OneToMany(mappedBy = "drink", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<OrderItem> orderItems;
+
+    @OneToMany(mappedBy = "drink", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<BranchStock> branchStocks;
 }

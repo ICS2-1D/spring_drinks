@@ -41,7 +41,7 @@ const showLoginBtn = document.getElementById('show-login-btn');
 
 // Global state
 let authToken = null;
-let adminBranch = null; // To store the admin's assigned branch
+let adminBranch = null;
 
 function displayMessage(boxElement, message, type) {
     boxElement.textContent = message;
@@ -61,7 +61,7 @@ function displayMessage(boxElement, message, type) {
 
 async function connectAdmin() {
     try {
-        const response = await fetch('/connect'); // Connects as an admin
+        const response = await fetch('/connect');
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(errorText || 'Failed to connect to admin services');
@@ -74,7 +74,6 @@ async function connectAdmin() {
     } catch (error) {
         console.error('Admin Connection error:', error);
         displayMessage(loginMessageBox, error.message, 'error');
-        // Prevent login if connection fails or is not from NAIROBI
         document.querySelector('#login-form button[type="submit"]').disabled = true;
     }
 }
@@ -294,7 +293,7 @@ async function handleUpdateDrink(event) {
     displayMessage(drinkMessageBox, 'Updating...', 'info');
 
     try {
-        const response = await fetch(`/admin/drinks/${drinkId}`, {
+        const response = await fetch(`/admin/drinks/${drinkId}?branch=${adminBranch || 'NAIROBI'}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
             body: JSON.stringify(updatedData)
@@ -376,7 +375,6 @@ function createSingleReportTable(report) {
     return container;
 }
 
-// NEW: Render Low Stock Items
 function renderLowStock(drinks) {
     lowStockList.innerHTML = '';
     if (!drinks || drinks.length === 0) {
@@ -415,7 +413,6 @@ function renderLowStock(drinks) {
     });
 }
 
-// NEW: Handle Restock Button Click
 async function handleRestock(event) {
     const button = event.target;
     const drinkId = button.dataset.drinkId;
@@ -439,7 +436,6 @@ async function handleRestock(event) {
 
         if (response.ok) {
             alert('Restock request sent successfully!');
-            // Refresh the low stock list
             fetchAndRender('/admin/low-stock', renderLowStock, lowStockList, 'Failed to load low stock items.');
         } else {
             const errorText = await response.text();
@@ -458,8 +454,8 @@ document.addEventListener('DOMContentLoaded', () => {
     authToken = sessionStorage.getItem('adminAuthToken');
     if (authToken) {
         showMainMenu();
+        connectAdmin(); // Connect to establish admin branch, even if logged in
     } else {
-        connectAdmin(); // Try to connect and check branch before enabling login
         showLoginForm();
     }
 });
@@ -494,7 +490,6 @@ menuLogoutBtn.addEventListener('click', (e) => {
     handleLogout();
 });
 
-// NEW: Event listener for low stock menu item
 menuViewLowStockBtn.addEventListener('click', (e) => {
     e.preventDefault();
     showAdminContentSection(lowStockViewSection);

@@ -2,34 +2,29 @@ package com.ics.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@Entity
-@Table(name = "branch_inventory")
 @Data
-@NoArgsConstructor
+@RequiredArgsConstructor
+@Entity
+@Table(name = "branch_stock")
 public class BranchStock {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "branch", nullable = false)
+    @Column(nullable = false)
     private Branch branch;
 
-    @Column(name = "drink_id")
-    private Long drinkId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "drink_id", nullable = false)
+    private Drink drink;
 
-    @Column(name = "quantity", nullable = false)
+    @Column(nullable = false)
     private int quantity;
 
     @Column(name = "low_stock_threshold", nullable = false)
-    private int lowStockThreshold;
-
-    @Column(name = "last_updated")
-    private java.sql.Timestamp lastUpdated;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "drink_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private Drink drink;
+    private int lowStockThreshold = 10;
 }

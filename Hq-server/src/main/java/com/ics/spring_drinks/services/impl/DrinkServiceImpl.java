@@ -9,6 +9,8 @@ import com.ics.spring_drinks.repository.DrinkRepository;
 import com.ics.spring_drinks.services.DrinkService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,13 +20,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DrinkServiceImpl implements DrinkService {
 
+    private static final Logger logger = LoggerFactory.getLogger(DrinkServiceImpl.class);
     private final DrinkRepository drinkRepository;
     private final BranchStockRepository branchStockRepository;
 
     @Override
     public List<DrinkDto> getAllDrinks(Branch branch) {
-        return branchStockRepository.findByBranch(branch).stream()
-                .map(this::mapToDto)
+        logger.info("Fetching all drinks for branch: {}", branch);
+        List<BranchStock> stockItems = branchStockRepository.findByBranch(branch);
+        logger.info("Found {} stock items for branch {}", stockItems.size(), branch);
+
+        return stockItems.stream()
+                .map(this::mapToDto) // Uses the corrected mapper
                 .collect(Collectors.toList());
     }
 
@@ -38,19 +45,21 @@ public class DrinkServiceImpl implements DrinkService {
     }
 
     @Override
+    @Transactional
     public DrinkDto createDrink(DrinkDto drinkDto) {
+        logger.info("Creating new drink product: {}", drinkDto.getDrinkName());
         Drink drink = new Drink();
         drink.setDrinkName(drinkDto.getDrinkName());
         drink.setDrinkPrice(drinkDto.getDrinkPrice());
         Drink savedDrink = drinkRepository.save(drink);
 
-        // Initialize stock for all branches
         for (Branch branch : Branch.values()) {
             BranchStock branchStock = new BranchStock();
             branchStock.setBranch(branch);
             branchStock.setDrink(savedDrink);
-            branchStock.setQuantity(drinkDto.getDrinkQuantity()); // Initial quantity
+            branchStock.setQuantity(drinkDto.getDrinkQuantity());
             branchStockRepository.save(branchStock);
+            logger.info("Initialized stock for {} at {} branch with quantity {}", savedDrink.getDrinkName(), branch, drinkDto.getDrinkQuantity());
         }
 
         BranchStock initialStock = branchStockRepository.findByBranchAndDrink(Branch.NAIROBI, savedDrink).get();
@@ -96,21 +105,20 @@ public class DrinkServiceImpl implements DrinkService {
 
         branchStock.setQuantity(branchStock.getQuantity() + quantity);
         branchStockRepository.save(branchStock);
+        logger.info("Restocked {} at {} with {} items. New quantity: {}", drink.getDrinkName(), branch, quantity, branchStock.getQuantity());
     }
 
-    /**
-     * NEW: Implementation to fetch all low stock items from the repository
-     * and map them to DTOs that include branch information.
-     */
     @Override
     @Transactional
     public List<DrinkDto> getLowStockItems() {
-        return branchStockRepository.findLowStockItems().stream()
-                .map(this::mapToDtoWithBranch)
+        logger.info("Fetching all low stock items from all branches.");
+        List<BranchStock> lowStock = branchStockRepository.findLowStockItems();
+        logger.info("Found {} low stock items in total.", lowStock.size());
+        return lowStock.stream()
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
-    // Mapper for contexts where branch info in the DTO is not needed
     private DrinkDto mapToDto(BranchStock branchStock) {
         Drink drink = branchStock.getDrink();
         return new DrinkDto(
@@ -118,18 +126,7 @@ public class DrinkServiceImpl implements DrinkService {
                 drink.getDrinkName(),
                 branchStock.getQuantity(),
                 drink.getDrinkPrice(),
-                null // Branch is null
-        );
-    }
-
-    private DrinkDto mapToDtoWithBranch(BranchStock branchStock) {
-        Drink drink = branchStock.getDrink();
-        return new DrinkDto(
-                drink.getId(),
-                drink.getDrinkName(),
-                branchStock.getQuantity(),
-                drink.getDrinkPrice(),
-                branchStock.getBranch() // Set the branch here
+                branchStock.getBranch() // This ensures the branch is always included in the DTO
         );
     }
 }

@@ -7,6 +7,7 @@ import com.ics.models.OrderStatus;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 
 public class ClientHandler implements Runnable {
@@ -42,11 +43,9 @@ public class ClientHandler implements Runnable {
                     return;
                 }
 
-                boolean isAdmin = false;
+                boolean isAdmin = "CONNECT_ADMIN".equalsIgnoreCase(initialRequest.getType());
 
-                if ("CONNECT_ADMIN".equalsIgnoreCase(initialRequest.getType())) {
-                    isAdmin = true;
-                } else if (!"CONNECT".equalsIgnoreCase(initialRequest.getType())) {
+                if (!isAdmin && !"CONNECT".equalsIgnoreCase(initialRequest.getType())) {
                     sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Expected CONNECT or CONNECT_ADMIN.");
                     return;
                 }
@@ -92,7 +91,6 @@ public class ClientHandler implements Runnable {
 
     private Response processRequest(Request request) {
         try {
-            // Note: "CONNECT" is correctly handled outside this switch now.
             return switch (request.getType()) {
                 case "GET_BRANCH_INFO" -> handleBranchInfo();
                 case "GET_ALL_DRINKS" -> handleGetDrinks();
@@ -104,43 +102,48 @@ public class ClientHandler implements Runnable {
                 case "ADD_DRINK" -> handleAddDrink(request);
                 case "UPDATE_DRINK" -> handleUpdateDrink(request);
                 case "GET_SALES_REPORT" -> handleSalesReport(request);
+                case "GET_LOW_STOCK" -> handleGetLowStock(); // NEW: Handle request
+                case "RESTOCK_DRINK" -> handleRestockDrink(request);
                 default -> errorResponse("Unknown request type: " + request.getType());
             };
         } catch (Exception e) {
+            e.printStackTrace();
             return errorResponse("Server error: " + e.getMessage());
         }
     }
 
-    // Branch operations
+    /**
+     * NEW: Handles the request to get all low stock items.
+     */
+    private Response handleGetLowStock() {
+        if (!isAdminBranch()) return adminOnlyError();
+        try {
+            List<DrinkDto> lowStockItems = services.drinkService().getLowStockItems();
+            return successResponse(lowStockItems, "Low stock items retrieved successfully.");
+        } catch (Exception e) {
+            System.err.println("❌ Error getting low stock items: " + e.getMessage());
+            return errorResponse("Failed to retrieve low stock items.");
+        }
+    }
+
+    private Response handleRestockDrink(Request request) {
+        if (!isAdminBranch()) return adminOnlyError();
+        Map<String, Object> data = (Map<String, Object>) request.getPayload();
+        long drinkId = Long.parseLong(data.get("drinkId").toString());
+        Branch branch = Branch.valueOf(data.get("branch").toString());
+        int quantity = Integer.parseInt(data.get("quantity").toString());
+        services.drinkService().restockDrink(drinkId, branch, quantity);
+        return successResponse(null, "Drink restocked successfully");
+    }
+
     private Response handleBranchInfo() {
         return successResponse(assignedBranch, "Branch info for " + assignedBranch.name());
     }
 
-    // Drink operations
     private Response handleGetDrinks() {
-        return successResponse(services.drinkService().getAllDrinks(), "Drinks retrieved");
+        return successResponse(services.drinkService().getAllDrinks(assignedBranch), "Drinks retrieved");
     }
 
-    private Response handleAddDrink(Request request) {
-        if (!isAdminBranch()) return adminOnlyError();
-
-        Map<String, Object> data = (Map<String, Object>) request.getPayload();
-        DrinkDto drink = createDrinkFromMap(data);
-        DrinkDto result = services.drinkService().createDrink(drink);
-        return successResponse(result, "Drink added successfully");
-    }
-
-    private Response handleUpdateDrink(Request request) {
-        if (!isAdminBranch()) return adminOnlyError();
-
-        Map<String, Object> data = (Map<String, Object>) request.getPayload();
-        Long drinkId = Long.valueOf(data.get("drinkId").toString());
-        DrinkDto updates = createDrinkUpdateFromMap(data);
-        DrinkDto result = services.drinkService().updateDrink(drinkId, updates);
-        return successResponse(result, "Drink updated successfully");
-    }
-
-    // Order operations
     private Response handleCreateOrder(Request request) {
         OrderRequest orderRequest = (OrderRequest) request.getPayload();
         orderRequest.setBranch(assignedBranch);
@@ -148,27 +151,38 @@ public class ClientHandler implements Runnable {
         return successResponse(result, "Order created successfully");
     }
 
+    private Response handleAddDrink(Request request) {
+        if (!isAdminBranch()) return adminOnlyError();
+        DrinkDto drink = createDrinkFromMap((Map<String, Object>) request.getPayload());
+        DrinkDto result = services.drinkService().createDrink(drink);
+        return successResponse(result, "Drink added successfully");
+    }
+
+    private Response handleUpdateDrink(Request request) {
+        if (!isAdminBranch()) return adminOnlyError();
+        Map<String, Object> data = (Map<String, Object>) request.getPayload();
+        Long drinkId = Long.valueOf(data.get("drinkId").toString());
+        DrinkDto updates = createDrinkUpdateFromMap(data);
+        DrinkDto result = services.drinkService().updateDrink(drinkId, updates, assignedBranch);
+        return successResponse(result, "Drink updated successfully");
+    }
+
     private Response handleUpdateOrderStatus(Request request) {
         Map<String, Object> data = (Map<String, Object>) request.getPayload();
         int orderId = Integer.parseInt(data.get("orderId").toString());
         OrderStatus status = OrderStatus.valueOf(data.get("orderStatus").toString());
-
         services.orderService().changeOrderStatusAndUpdateInventory(orderId, status);
         return successResponse(null, "Order status updated");
     }
 
-    // Payment operations
     private Response handleCreatePayment(Request request) {
-        Map<String, Object> data = (Map<String, Object>) request.getPayload();
-        PaymentRequest paymentRequest = createPaymentFromMap(data);
+        PaymentRequest paymentRequest = createPaymentFromMap((Map<String, Object>) request.getPayload());
         PaymentResponse result = services.paymentService().processPayment(paymentRequest);
         return successResponse(result, "Payment processed successfully");
     }
 
-    // Admin operations
     private Response handleAdminLogin(Request request) {
         if (!isAdminBranch()) return adminOnlyError();
-
         RegisterRequest loginRequest = (RegisterRequest) request.getPayload();
         try {
             String token = services.adminService().login(loginRequest.getUsername(), loginRequest.getPassword());
@@ -180,58 +194,28 @@ public class ClientHandler implements Runnable {
 
     private Response handleAdminRegister(Request request) {
         if (!isAdminBranch()) return adminOnlyError();
-
         try {
-            RegisterRequest registerRequest = (RegisterRequest) request.getPayload();
-            services.adminService().registerAdmin(registerRequest);
+            services.adminService().registerAdmin((RegisterRequest) request.getPayload());
             return successResponse(null, "Admin registered successfully");
         } catch (IllegalArgumentException e) {
             return errorResponse(e.getMessage());
         }
     }
 
-
     private Response handleSalesReport(Request request) {
         if (!isAdminBranch()) return adminOnlyError();
-
-        try {
-            // Check the request payload to see if a specific branch was requested
-            Map<String, Object> data = (Map<String, Object>) request.getPayload();
-            Branch targetBranch = null;
-
-            if (data != null && data.containsKey("branch")) {
-                try {
-                    targetBranch = Branch.valueOf(data.get("branch").toString());
-                } catch (IllegalArgumentException e) {
-                    return errorResponse("Invalid branch name specified.");
-                }
-            }
-
-            Object report;
-            if (targetBranch != null) {
-                // If a branch is specified, get the report for that branch
-                report = services.reportService().buildSalesReportForBranch(targetBranch);
-            } else {
-                // Otherwise, get the full consolidated report
-                report = services.reportService().buildConsolidatedReport();
-            }
-
-            return successResponse(report, "Sales report generated successfully");
-        } catch (Exception e) {
-            // It's good practice to log the full error on the server
-            System.err.println("❌ Failed to generate report: " + e.getMessage());
-            e.printStackTrace();
-            return errorResponse("Failed to generate report: An internal error occurred.");
-        }
+        Map<String, Object> data = (Map<String, Object>) request.getPayload();
+        Branch targetBranch = data != null && data.containsKey("branch") ? Branch.valueOf(data.get("branch").toString()) : null;
+        Object report = targetBranch != null ? services.reportService().buildSalesReportForBranch(targetBranch) : services.reportService().buildConsolidatedReport();
+        return successResponse(report, "Sales report generated successfully");
     }
 
-    // Helper methods
     private boolean isAdminBranch() {
         return assignedBranch == Branch.NAIROBI;
     }
 
     private Response adminOnlyError() {
-        return errorResponse("Access Denied: Admin actions only allowed from Nairobi branch");
+        return new Response(Response.Status.ERROR, null, "Access Denied: Admin actions only allowed from Nairobi branch");
     }
 
     private Response successResponse(Object data, String message) {
@@ -242,28 +226,19 @@ public class ClientHandler implements Runnable {
         return new Response(Response.Status.ERROR, null, message);
     }
 
-    private void sendResponse(ObjectOutputStream out, Response.Status status, Object data, String message)
-            throws IOException {
+    private void sendResponse(ObjectOutputStream out, Response.Status status, Object data, String message) throws IOException {
         out.writeObject(new Response(status, data, message));
         out.flush();
     }
 
     private DrinkDto createDrinkFromMap(Map<String, Object> data) {
-        DrinkDto drink = new DrinkDto();
-        drink.setDrinkName(data.get("drinkName").toString());
-        drink.setDrinkPrice(Double.parseDouble(data.get("drinkPrice").toString()));
-        drink.setDrinkQuantity(Integer.parseInt(data.get("drinkQuantity").toString()));
-        return drink;
+        return new DrinkDto(null, data.get("drinkName").toString(), Integer.parseInt(data.get("drinkQuantity").toString()), Double.parseDouble(data.get("drinkPrice").toString()), null);
     }
 
     private DrinkDto createDrinkUpdateFromMap(Map<String, Object> data) {
         DrinkDto drink = new DrinkDto();
-        if (data.containsKey("drinkPrice")) {
-            drink.setDrinkPrice(Double.parseDouble(data.get("drinkPrice").toString()));
-        }
-        if (data.containsKey("drinkQuantity")) {
-            drink.setDrinkQuantity(Integer.parseInt(data.get("drinkQuantity").toString()));
-        }
+        if (data.containsKey("drinkPrice")) drink.setDrinkPrice(Double.parseDouble(data.get("drinkPrice").toString()));
+        if (data.containsKey("drinkQuantity")) drink.setDrinkQuantity(Integer.parseInt(data.get("drinkQuantity").toString()));
         return drink;
     }
 
@@ -281,7 +256,9 @@ public class ClientHandler implements Runnable {
             if (assignedBranch != null) {
                 branchManager.unassignBranch(clientId, assignedBranch);
             }
-            clientSocket.close();
+            if (clientSocket != null && !clientSocket.isClosed()) {
+                clientSocket.close();
+            }
         } catch (IOException e) {
             System.err.println("❌ Cleanup error: " + e.getMessage());
         }

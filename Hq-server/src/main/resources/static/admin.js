@@ -14,6 +14,7 @@ const menuViewStockBtn = document.getElementById('menu-view-stock');
 const menuUpdateDrinksBtn = document.getElementById('menu-update-drinks');
 const menuViewSalesBtn = document.getElementById('menu-view-sales');
 const menuLogoutBtn = document.getElementById('menu-logout');
+const menuViewLowStockBtn = document.getElementById('menu-view-low-stock');
 
 // Admin Content Area
 const adminMainContentArea = document.getElementById('admin-main-content-area');
@@ -23,10 +24,12 @@ const backToMenuBtn = document.getElementById('back-to-menu-btn');
 const manageDrinksSection = document.getElementById('manage-drinks-section');
 const salesReportSection = document.getElementById('sales-report-section');
 const stockViewSection = document.getElementById('stock-view-section');
+const lowStockViewSection = document.getElementById('low-stock-view-section');
 
 // Specific element references
 const manageDrinksList = document.getElementById('manage-drinks-list');
 const viewStockList = document.getElementById('view-stock-list');
+const lowStockList = document.getElementById('low-stock-list');
 const salesReportContent = document.getElementById('sales-report-content');
 const reportMessageBox = document.getElementById('report-message-box');
 const branchSelect = document.getElementById('branch-select');
@@ -38,30 +41,44 @@ const showLoginBtn = document.getElementById('show-login-btn');
 
 // Global state
 let authToken = null;
+let adminBranch = null; // To store the admin's assigned branch
 
-/**
- * Displays a message in a specified message box with appropriate styling.
- * @param {HTMLElement} boxElement - The DOM element for the message box.
- * @param {string} message - The message to display.
- * @param {'success' | 'error' | 'info'} type - The type of message for styling.
- */
 function displayMessage(boxElement, message, type) {
     boxElement.textContent = message;
-    boxElement.classList.remove('bg-brand-success', 'bg-brand-danger', 'bg-brand-accent', 'text-white');
+    boxElement.classList.remove('hidden', 'bg-brand-success', 'bg-brand-danger', 'bg-brand-accent', 'text-white', 'bg-brand-warning');
 
-    if (type === 'success') {
-        boxElement.classList.add('bg-brand-success', 'text-white');
-    } else if (type === 'error') {
-        boxElement.classList.add('bg-brand-danger', 'text-white');
-    } else { // 'info'
-        boxElement.classList.add('bg-brand-accent', 'text-white');
-    }
+    const typeClasses = {
+        success: ['bg-brand-success', 'text-white'],
+        error: ['bg-brand-danger', 'text-white'],
+        info: ['bg-brand-accent', 'text-white'],
+        warning: ['bg-brand-warning', 'text-black']
+    };
+    boxElement.classList.add(...(typeClasses[type] || typeClasses.info));
     boxElement.classList.remove('hidden');
 
     setTimeout(() => boxElement.classList.add('hidden'), 5000);
 }
 
-// --- Authentication ---
+async function connectAdmin() {
+    try {
+        const response = await fetch('/connect'); // Connects as an admin
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to connect to admin services');
+        }
+        const data = await response.json();
+        adminBranch = data.branch;
+        if (adminBranch !== 'NAIROBI') {
+            throw new Error('Admin access is restricted to the NAIROBI branch.');
+        }
+    } catch (error) {
+        console.error('Admin Connection error:', error);
+        displayMessage(loginMessageBox, error.message, 'error');
+        // Prevent login if connection fails or is not from NAIROBI
+        document.querySelector('#login-form button[type="submit"]').disabled = true;
+    }
+}
+
 
 async function handleLogin(event) {
     event.preventDefault();
@@ -89,12 +106,12 @@ async function handleLogin(event) {
             showMainMenu();
         } else {
             const errorText = await response.text();
-            displayMessage(loginMessageBox, `Login failed: ${errorText}`, 'error');
-            authToken = null;
+            throw new Error(errorText || 'Login failed');
         }
     } catch (error) {
         console.error('Error during login:', error);
-        displayMessage(loginMessageBox, 'An unexpected error occurred during login.', 'error');
+        displayMessage(loginMessageBox, error.message, 'error');
+        authToken = null;
     }
 }
 
@@ -128,16 +145,17 @@ async function handleRegister(event) {
             showLoginForm();
         } else {
             const errorText = await response.text();
-            displayMessage(registerMessageBox, `Registration failed: ${errorText}`, 'error');
+            throw new Error(errorText || 'Registration failed');
         }
     } catch (error) {
         console.error('Error during registration:', error);
-        displayMessage(registerMessageBox, 'An unexpected error occurred.', 'error');
+        displayMessage(registerMessageBox, error.message, 'error');
     }
 }
 
 function handleLogout() {
     authToken = null;
+    adminBranch = null;
     sessionStorage.removeItem('adminAuthToken');
     mainMenuSection.classList.add('hidden');
     adminMainContentArea.classList.add('hidden');
@@ -147,8 +165,6 @@ function handleLogout() {
     loginForm.reset();
     registerForm.reset();
 }
-
-// --- UI Navigation & View Management ---
 
 function showMainMenu() {
     authSection.classList.add('hidden');
@@ -166,7 +182,7 @@ function showAdminContentSection(sectionToShow) {
 }
 
 function hideAllAdminSubSections() {
-    [manageDrinksSection, salesReportSection, stockViewSection].forEach(sec => sec.classList.add('hidden'));
+    [manageDrinksSection, salesReportSection, stockViewSection, lowStockViewSection].forEach(sec => sec.classList.add('hidden'));
 }
 
 function showLoginForm() {
@@ -182,8 +198,6 @@ function showRegisterForm() {
     loginMessageBox.classList.add('hidden');
     registerMessageBox.classList.add('hidden');
 }
-
-// --- API Calls & Rendering ---
 
 async function fetchAndRender(endpoint, renderer, loadingElement, errorMessage) {
     loadingElement.innerHTML = `<p class="text-brand-text-dim text-center py-4">Loading...</p>`;
@@ -211,11 +225,10 @@ async function fetchAndRender(endpoint, renderer, loadingElement, errorMessage) 
     }
 }
 
-// View Stock
 function renderViewStock(drinks) {
     viewStockList.innerHTML = '';
     if (!drinks || drinks.length === 0) {
-        viewStockList.innerHTML = '<p class="text-brand-text-dim text-center py-4">No drinks in stock.</p>';
+        viewStockList.innerHTML = '<p class="text-brand-text-dim text-center py-4">No drinks in stock for this branch.</p>';
         return;
     }
     const table = document.createElement('table');
@@ -240,11 +253,10 @@ function renderViewStock(drinks) {
     viewStockList.appendChild(table);
 }
 
-// Update Drinks
 function renderManageDrinks(drinks) {
     manageDrinksList.innerHTML = '';
     if (!drinks || drinks.length === 0) {
-        manageDrinksList.innerHTML = '<p class="text-brand-text-dim text-center py-4">No drinks found.</p>';
+        manageDrinksList.innerHTML = '<p class="text-brand-text-dim text-center py-4">No drinks found for this branch.</p>';
         return;
     }
     drinks.forEach(drink => {
@@ -275,7 +287,6 @@ async function handleUpdateDrink(event) {
     const drinkId = form.dataset.drinkId;
     const drinkMessageBox = form.querySelector(`#drink-message-box-${drinkId}`);
     const updatedData = {
-        id: parseInt(drinkId),
         drinkPrice: parseFloat(form.querySelector(`[id^="price-"]`).value),
         drinkQuantity: parseInt(form.querySelector(`[id^="quantity-"]`).value)
     };
@@ -283,7 +294,6 @@ async function handleUpdateDrink(event) {
     displayMessage(drinkMessageBox, 'Updating...', 'info');
 
     try {
-        // CORRECTED ENDPOINT
         const response = await fetch(`/admin/drinks/${drinkId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
@@ -301,9 +311,7 @@ async function handleUpdateDrink(event) {
     }
 }
 
-// Sales Report
 function fetchSalesReport(branch = null) {
-    // CORRECTED ENDPOINT LOGIC
     const endpoint = branch ? `/reports/branch/${branch}` : '/reports/consolidated';
     fetchAndRender(endpoint, (data) => renderSalesReport(data, !branch), salesReportContent, 'Failed to load sales report');
 }
@@ -311,7 +319,6 @@ function fetchSalesReport(branch = null) {
 function renderSalesReport(report, isConsolidated) {
     salesReportContent.innerHTML = '';
     if (isConsolidated) {
-        // Render Consolidated Report
         const reportContainer = document.createElement('div');
         reportContainer.innerHTML = `
             <div class="bg-brand-bg p-4 rounded-lg mb-4 border border-brand-border">
@@ -332,7 +339,6 @@ function renderSalesReport(report, isConsolidated) {
         }
         salesReportContent.appendChild(reportContainer);
     } else {
-        // Render Single Branch Report
         salesReportContent.appendChild(createSingleReportTable(report));
     }
 }
@@ -341,7 +347,7 @@ function createSingleReportTable(report) {
     const container = document.createElement('div');
     const table = document.createElement('table');
     table.className = 'min-w-full bg-brand-bg border border-brand-border rounded-lg overflow-hidden';
-    
+
     let tableRows = '<p class="p-4 text-brand-text-dim">No sales recorded for this period.</p>';
     if (report.drinksSold && Object.keys(report.drinksSold).length > 0) {
         tableRows = Object.entries(report.drinksSold)
@@ -370,6 +376,82 @@ function createSingleReportTable(report) {
     return container;
 }
 
+// NEW: Render Low Stock Items
+function renderLowStock(drinks) {
+    lowStockList.innerHTML = '';
+    if (!drinks || drinks.length === 0) {
+        lowStockList.innerHTML = '<p class="text-brand-text-dim text-center py-4">No items are currently low on stock.</p>';
+        return;
+    }
+    const table = document.createElement('table');
+    table.className = 'min-w-full bg-brand-bg border border-brand-border rounded-lg overflow-hidden';
+    table.innerHTML = `
+        <thead class="bg-brand-card">
+            <tr>
+                <th class="py-3 px-4 text-left text-sm font-semibold text-brand-text-light">Drink Name</th>
+                <th class="py-3 px-4 text-left text-sm font-semibold text-brand-text-light">Branch</th>
+                <th class="py-3 px-4 text-left text-sm font-semibold text-brand-text-light text-brand-warning">Quantity</th>
+                <th class="py-3 px-4 text-left text-sm font-semibold text-brand-text-light">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${drinks.map(drink => `
+                <tr class="border-b border-brand-border last:border-b-0 hover:bg-brand-card/50">
+                    <td class="py-3 px-4 text-white">${drink.drinkName}</td>
+                    <td class="py-3 px-4 text-white">${drink.branch}</td>
+                    <td class="py-3 px-4 text-brand-warning font-bold">${drink.drinkQuantity}</td>
+                    <td class="py-3 px-4 text-white">
+                        <button class="restock-btn bg-brand-accent hover:bg-brand-accent-hover text-white font-semibold py-1 px-3 rounded-lg transition" data-drink-id="${drink.id}" data-branch="${drink.branch}">
+                            Restock
+                        </button>
+                    </td>
+                </tr>
+            `).join('')}
+        </tbody>`;
+    lowStockList.appendChild(table);
+
+    document.querySelectorAll('.restock-btn').forEach(button => {
+        button.addEventListener('click', handleRestock);
+    });
+}
+
+// NEW: Handle Restock Button Click
+async function handleRestock(event) {
+    const button = event.target;
+    const drinkId = button.dataset.drinkId;
+    const branch = button.dataset.branch;
+
+    const quantity = prompt(`Enter quantity to restock for ${branch}:`, 50);
+
+    if (!quantity || isNaN(quantity) || quantity <= 0) {
+        alert('Invalid quantity entered.');
+        return;
+    }
+
+    button.textContent = 'Restocking...';
+    button.disabled = true;
+
+    try {
+        const response = await fetch(`/drinks/restock?drinkId=${drinkId}&branch=${branch}&quantity=${quantity}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (response.ok) {
+            alert('Restock request sent successfully!');
+            // Refresh the low stock list
+            fetchAndRender('/admin/low-stock', renderLowStock, lowStockList, 'Failed to load low stock items.');
+        } else {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to send restock request');
+        }
+    } catch (error) {
+        console.error('Error restocking:', error);
+        alert(`Restock failed: ${error.message}`);
+        button.textContent = 'Restock';
+        button.disabled = false;
+    }
+}
 
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -377,6 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (authToken) {
         showMainMenu();
     } else {
+        connectAdmin(); // Try to connect and check branch before enabling login
         showLoginForm();
     }
 });
@@ -388,23 +471,21 @@ showLoginBtn.addEventListener('click', showLoginForm);
 logoutBtn.addEventListener('click', handleLogout);
 backToMenuBtn.addEventListener('click', showMainMenu);
 
-// Menu buttons
 menuViewStockBtn.addEventListener('click', (e) => {
     e.preventDefault();
     showAdminContentSection(stockViewSection);
-    fetchAndRender('/drinks', renderViewStock, viewStockList, 'Failed to load stock.');
+    fetchAndRender(`/drinks?branch=${adminBranch || 'NAIROBI'}`, renderViewStock, viewStockList, 'Failed to load stock.');
 });
 
 menuUpdateDrinksBtn.addEventListener('click', (e) => {
     e.preventDefault();
     showAdminContentSection(manageDrinksSection);
-    fetchAndRender('/drinks', renderManageDrinks, manageDrinksList, 'Failed to load drinks.');
+    fetchAndRender(`/drinks?branch=${adminBranch || 'NAIROBI'}`, renderManageDrinks, manageDrinksList, 'Failed to load drinks.');
 });
 
 menuViewSalesBtn.addEventListener('click', (e) => {
     e.preventDefault();
     showAdminContentSection(salesReportSection);
-    // Clear previous report content when navigating to the section
     salesReportContent.innerHTML = '<p class="text-brand-text-dim text-center py-4">Select a report type to view data.</p>';
 });
 
@@ -413,6 +494,12 @@ menuLogoutBtn.addEventListener('click', (e) => {
     handleLogout();
 });
 
-// Sales Report buttons
+// NEW: Event listener for low stock menu item
+menuViewLowStockBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    showAdminContentSection(lowStockViewSection);
+    fetchAndRender('/admin/low-stock', renderLowStock, lowStockList, 'Failed to load low stock items.');
+});
+
 getBranchReportBtn.addEventListener('click', () => fetchSalesReport(branchSelect.value));
 getConsolidatedReportBtn.addEventListener('click', () => fetchSalesReport());

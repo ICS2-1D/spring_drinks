@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spring Drinks - Admin Panel</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
-        // Custom Tailwind CSS Configuration to match the main site
         tailwind.config = {
             theme: {
                 extend: {
@@ -19,22 +16,22 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        'brand-bg': '#0D1117',      // Near-black background
-                        'brand-card': '#161B22',    // Dark grey for cards
-                        'brand-border': '#30363D', // Subtle border color
-                        'brand-text-light': '#C9D1D9', // Light grey for primary text
-                        'brand-text-dim': '#8B949E',   // Dimmer grey for secondary text
-                        'brand-accent': '#58A6FF',     // A vibrant blue for accents
-                        'brand-accent-hover': '#79B8FF', // Lighter blue for hover
-                        'brand-success': '#3FB950',   // Green for success messages
-                        'brand-danger': '#F85149',     // Red for errors
+                        'brand-bg': '#0D1117',
+                        'brand-card': '#161B22',
+                        'brand-border': '#30363D',
+                        'brand-text-light': '#C9D1D9',
+                        'brand-text-dim': '#8B949E',
+                        'brand-accent': '#58A6FF',
+                        'brand-accent-hover': '#79B8FF',
+                        'brand-success': '#3FB950',
+                        'brand-danger': '#F85149',
+                        'brand-warning': '#F7B93E',
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Custom scrollbar for a consistent dark theme look */
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: #0D1117; }
         ::-webkit-scrollbar-thumb { background: #30363D; border-radius: 10px; }
@@ -43,136 +40,136 @@
 </head>
 <body class="bg-brand-bg font-sans text-brand-text-light antialiased">
 
-    <!-- Header -->
-    <header class="bg-brand-bg/80 backdrop-blur-lg border-b border-brand-border sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <svg class="w-8 h-8 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <h1 class="text-2xl font-bold text-white">Admin Panel</h1>
-            </div>
-            <nav>
-                <a href="/index.html" class="text-brand-text-dim hover:text-white transition-colors mr-4">Home</a>
-                <button id="logout-btn" class="bg-brand-danger hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-lg shadow-md transition hidden">Logout</button>
-            </nav>
+<header class="bg-brand-bg/80 backdrop-blur-lg border-b border-brand-border sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <svg class="w-8 h-8 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <h1 class="text-2xl font-bold text-white">Admin Panel</h1>
         </div>
-    </header>
+        <nav>
+            <a href="/index.html" class="text-brand-text-dim hover:text-white transition-colors mr-4">Home</a>
+            <button id="logout-btn" class="bg-brand-danger hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-lg shadow-md transition hidden">Logout</button>
+        </nav>
+    </div>
+</header>
 
-    <!-- Main Content Area -->
-    <main class="container mx-auto p-6 flex flex-col items-center justify-center">
+<main class="container mx-auto p-6 flex flex-col items-center justify-center">
 
-        <!-- Authentication Section -->
-        <section id="auth-section" class="bg-brand-card border border-brand-border p-8 rounded-xl shadow-lg w-full max-w-md">
-            <!-- Login Form -->
-            <div id="login-form-container">
-                <h2 class="text-3xl font-bold text-white mb-6 text-center">Admin Login</h2>
-                <form id="login-form" class="space-y-4">
-                    <div>
-                        <label for="loginUsername" class="block text-brand-text-dim text-sm font-medium mb-1">Username</label>
-                        <input type="text" id="loginUsername" name="username" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
-                    </div>
-                    <div>
-                        <label for="loginPassword" class="block text-brand-text-dim text-sm font-medium mb-1">Password</label>
-                        <input type="password" id="loginPassword" name="password" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
-                    </div>
-                    <button type="submit" class="w-full bg-brand-accent hover:bg-brand-accent-hover text-white font-bold py-3 rounded-lg transition-colors shadow-lg">Login</button>
-                </form>
-                <div id="login-message-box" class="mt-4 p-3 text-center rounded-lg text-sm hidden"></div>
-                <p class="text-brand-text-dim text-center mt-4">No account? <button id="show-register-btn" class="text-brand-accent hover:underline font-semibold">Register here</button></p>
-            </div>
+    <section id="auth-section" class="bg-brand-card border border-brand-border p-8 rounded-xl shadow-lg w-full max-w-md">
+        <div id="login-form-container">
+            <h2 class="text-3xl font-bold text-white mb-6 text-center">Admin Login</h2>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="loginUsername" class="block text-brand-text-dim text-sm font-medium mb-1">Username</label>
+                    <input type="text" id="loginUsername" name="username" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
+                </div>
+                <div>
+                    <label for="loginPassword" class="block text-brand-text-dim text-sm font-medium mb-1">Password</label>
+                    <input type="password" id="loginPassword" name="password" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
+                </div>
+                <button type="submit" class="w-full bg-brand-accent hover:bg-brand-accent-hover text-white font-bold py-3 rounded-lg transition-colors shadow-lg">Login</button>
+            </form>
+            <div id="login-message-box" class="mt-4 p-3 text-center rounded-lg text-sm hidden"></div>
+            <p class="text-brand-text-dim text-center mt-4">No account? <button id="show-register-btn" class="text-brand-accent hover:underline font-semibold">Register here</button></p>
+        </div>
 
-            <!-- Register Form -->
-            <div id="register-form-container" class="hidden">
-                <h2 class="text-3xl font-bold text-white mb-6 text-center">Create Admin Account</h2>
-                <form id="register-form" class="space-y-4">
-                    <div>
-                        <label for="registerUsername" class="block text-brand-text-dim text-sm font-medium mb-1">Username</label>
-                        <input type="text" id="registerUsername" name="username" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
-                    </div>
-                    <div>
-                        <label for="registerPassword" class="block text-brand-text-dim text-sm font-medium mb-1">Password</label>
-                        <input type="password" id="registerPassword" name="password" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
-                    </div>
-                    <div>
-                        <label for="confirmPassword" class="block text-brand-text-dim text-sm font-medium mb-1">Confirm Password</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
-                    </div>
-                    <button type="submit" class="w-full bg-brand-accent hover:bg-brand-accent-hover text-white font-bold py-3 rounded-lg transition-colors shadow-lg">Register</button>
-                </form>
-                <div id="register-message-box" class="mt-4 p-3 text-center rounded-lg text-sm hidden"></div>
-                <p class="text-brand-text-dim text-center mt-4">Have an account? <button id="show-login-btn" class="text-brand-accent hover:underline font-semibold">Login here</button></p>
+        <div id="register-form-container" class="hidden">
+            <h2 class="text-3xl font-bold text-white mb-6 text-center">Create Admin Account</h2>
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label for="registerUsername" class="block text-brand-text-dim text-sm font-medium mb-1">Username</label>
+                    <input type="text" id="registerUsername" name="username" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
+                </div>
+                <div>
+                    <label for="registerPassword" class="block text-brand-text-dim text-sm font-medium mb-1">Password</label>
+                    <input type="password" id="registerPassword" name="password" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
+                </div>
+                <div>
+                    <label for="confirmPassword" class="block text-brand-text-dim text-sm font-medium mb-1">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
+                </div>
+                <button type="submit" class="w-full bg-brand-accent hover:bg-brand-accent-hover text-white font-bold py-3 rounded-lg transition-colors shadow-lg">Register</button>
+            </form>
+            <div id="register-message-box" class="mt-4 p-3 text-center rounded-lg text-sm hidden"></div>
+            <p class="text-brand-text-dim text-center mt-4">Have an account? <button id="show-login-btn" class="text-brand-accent hover:underline font-semibold">Login here</button></p>
+        </div>
+    </section>
+
+    <section id="main-menu-section" class="bg-brand-card border border-brand-border p-8 rounded-xl shadow-lg w-full max-w-md hidden">
+        <h2 class="text-3xl font-bold text-white mb-6 text-center">Admin Menu</h2>
+        <ul class="space-y-3 text-lg">
+            <li><a href="#" id="menu-view-stock" class="block py-3 px-4 bg-brand-bg hover:bg-brand-border text-brand-text-light font-semibold rounded-lg transition flex items-center"><span class="mr-3">📦</span> View Branch Stock</a></li>
+            <li><a href="#" id="menu-update-drinks" class="block py-3 px-4 bg-brand-bg hover:bg-brand-border text-brand-text-light font-semibold rounded-lg transition flex items-center"><span class="mr-3">✏️</span> Update Branch Drinks</a></li>
+            <li><a href="#" id="menu-view-low-stock" class="block py-3 px-4 bg-brand-bg hover:bg-brand-border text-brand-text-light font-semibold rounded-lg transition flex items-center"><span class="mr-3 text-brand-warning">⚠️</span> Low Stock Alerts</a></li>
+            <li><a href="#" id="menu-view-sales" class="block py-3 px-4 bg-brand-bg hover:bg-brand-border text-brand-text-light font-semibold rounded-lg transition flex items-center"><span class="mr-3">📊</span> View Sales Report</a></li>
+            <li><a href="#" id="menu-logout" class="block py-3 px-4 bg-brand-danger/80 hover:bg-brand-danger text-white font-semibold rounded-lg transition flex items-center"><span class="mr-3">🚪</span> Logout</a></li>
+        </ul>
+    </section>
+
+    <div id="admin-main-content-area" class="hidden w-full max-w-6xl mt-8">
+        <button id="back-to-menu-btn" class="bg-brand-accent hover:bg-brand-accent-hover text-white font-bold py-2 px-4 rounded-lg mb-6 shadow-md transition">← Back to Menu</button>
+
+        <section id="manage-drinks-section" class="hidden">
+            <div class="bg-brand-card border border-brand-border p-6 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-white mb-6">Update Drinks (Nairobi Branch)</h2>
+                <div id="manage-drinks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] p-1">
+                    <p class="text-brand-text-dim text-center py-4">Loading drinks...</p>
+                </div>
             </div>
         </section>
 
-        <!-- Main Menu Section -->
-        <section id="main-menu-section" class="bg-brand-card border border-brand-border p-8 rounded-xl shadow-lg w-full max-w-md hidden">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Admin Menu</h2>
-            <ul class="space-y-3 text-lg">
-                <li><a href="#" id="menu-view-stock" class="block py-3 px-4 bg-brand-bg hover:bg-brand-border text-brand-text-light font-semibold rounded-lg transition flex items-center"><span class="mr-3">📦</span> View Stock</a></li>
-                <li><a href="#" id="menu-update-drinks" class="block py-3 px-4 bg-brand-bg hover:bg-brand-border text-brand-text-light font-semibold rounded-lg transition flex items-center"><span class="mr-3">✏️</span> Update Drinks</a></li>
-                <li><a href="#" id="menu-view-sales" class="block py-3 px-4 bg-brand-bg hover:bg-brand-border text-brand-text-light font-semibold rounded-lg transition flex items-center"><span class="mr-3">📊</span> View Sales Report</a></li>
-                <li><a href="#" id="menu-logout" class="block py-3 px-4 bg-brand-danger/80 hover:bg-brand-danger text-white font-semibold rounded-lg transition flex items-center"><span class="mr-3">🚪</span> Logout</a></li>
-            </ul>
+        <section id="sales-report-section" class="hidden">
+            <div class="bg-brand-card border border-brand-border p-6 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-white mb-6">Sales Report</h2>
+                <div class="bg-brand-bg p-4 rounded-lg border border-brand-border flex flex-col md:flex-row items-center gap-4 mb-6">
+                    <div class="flex-grow w-full">
+                        <label for="branch-select" class="block text-brand-text-dim text-sm font-medium mb-1">Select Branch</label>
+                        <select id="branch-select" class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
+                            <option value="NAIROBI">Nairobi</option>
+                            <option value="MOMBASA">Mombasa</option>
+                            <option value="KISUMU">Kisumu</option>
+                            <option value="ELDORET">Eldoret</option>
+                        </select>
+                    </div>
+                    <button id="get-branch-report-btn" class="w-full md:w-auto bg-brand-accent hover:bg-brand-accent-hover text-white font-bold py-2 px-4 rounded-lg transition">Get Branch Report</button>
+                    <span class="text-brand-text-dim hidden md:block">or</span>
+                    <button id="get-consolidated-report-btn" class="w-full md:w-auto bg-brand-success hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-lg transition">Get Consolidated Report</button>
+                </div>
+                <div id="sales-report-content">
+                    <p class="text-brand-text-dim text-center py-4">Select a report type to view data.</p>
+                </div>
+                <div id="report-message-box" class="mt-4 p-3 text-center rounded-lg text-sm hidden"></div>
+            </div>
         </section>
 
-        <!-- Admin Content Area -->
-        <div id="admin-main-content-area" class="hidden w-full max-w-6xl mt-8">
-            <button id="back-to-menu-btn" class="bg-brand-accent hover:bg-brand-accent-hover text-white font-bold py-2 px-4 rounded-lg mb-6 shadow-md transition">← Back to Menu</button>
-
-            <!-- Update Drinks Section -->
-            <section id="manage-drinks-section" class="hidden">
-                <div class="bg-brand-card border border-brand-border p-6 rounded-xl shadow-lg">
-                    <h2 class="text-3xl font-bold text-white mb-6">Update Drinks</h2>
-                    <div id="manage-drinks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] p-1">
-                        <p class="text-brand-text-dim text-center py-4">Loading drinks...</p>
-                    </div>
+        <section id="stock-view-section" class="hidden">
+            <div class="bg-brand-card border border-brand-border p-6 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-white mb-6">Current Stock (Nairobi Branch)</h2>
+                <div id="view-stock-list" class="overflow-y-auto max-h-[60vh] p-1">
+                    <p class="text-brand-text-dim text-center py-4">Loading stock data...</p>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Sales Report Section -->
-            <section id="sales-report-section" class="hidden">
-                <div class="bg-brand-card border border-brand-border p-6 rounded-xl shadow-lg">
-                    <h2 class="text-3xl font-bold text-white mb-6">Sales Report</h2>
-                    <div class="bg-brand-bg p-4 rounded-lg border border-brand-border flex flex-col md:flex-row items-center gap-4 mb-6">
-                        <div class="flex-grow w-full">
-                            <label for="branch-select" class="block text-brand-text-dim text-sm font-medium mb-1">Select Branch</label>
-                            <select id="branch-select" class="w-full bg-brand-bg border border-brand-border rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-brand-accent transition">
-                                <option value="NAIROBI">Nairobi</option>
-                                <option value="MOMBASA">Mombasa</option>
-                                <option value="KISUMU">Kisumu</option>
-                                <option value="ELDORET">Eldoret</option>
-                            </select>
-                        </div>
-                        <button id="get-branch-report-btn" class="w-full md:w-auto bg-brand-accent hover:bg-brand-accent-hover text-white font-bold py-2 px-4 rounded-lg transition">Get Branch Report</button>
-                        <span class="text-brand-text-dim hidden md:block">or</span>
-                        <button id="get-consolidated-report-btn" class="w-full md:w-auto bg-brand-success hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-lg transition">Get Consolidated Report</button>
-                    </div>
-                    <div id="sales-report-content">
-                        <p class="text-brand-text-dim text-center py-4">Select a report type to view data.</p>
-                    </div>
-                    <div id="report-message-box" class="mt-4 p-3 text-center rounded-lg text-sm hidden"></div>
+        <!-- NEW: Low Stock Alerts Section -->
+        <section id="low-stock-view-section" class="hidden">
+            <div class="bg-brand-card border border-brand-border p-6 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-white mb-6 flex items-center"><span class="text-brand-warning mr-3">⚠️</span>Low Stock Alerts</h2>
+                <div id="low-stock-list" class="overflow-y-auto max-h-[60vh] p-1">
+                    <p class="text-brand-text-dim text-center py-4">Loading low stock data...</p>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- View Stock Section -->
-            <section id="stock-view-section" class="hidden">
-                <div class="bg-brand-card border border-brand-border p-6 rounded-xl shadow-lg">
-                    <h2 class="text-3xl font-bold text-white mb-6">Current Stock</h2>
-                    <div id="view-stock-list" class="overflow-y-auto max-h-[60vh] p-1">
-                        <p class="text-brand-text-dim text-center py-4">Loading stock data...</p>
-                    </div>
-                </div>
-            </section>
+    </div>
+</main>
 
-        </div>
-    </main>
+<footer class="bg-brand-card border-t border-brand-border mt-16">
+    <div class="container mx-auto px-6 py-8 text-center text-brand-text-dim">
+        <p>&copy; 2025 Spring Drinks. Admin Panel.</p>
+    </div>
+</footer>
 
-    <!-- Footer -->
-    <footer class="bg-brand-card border-t border-brand-border mt-16">
-        <div class="container mx-auto px-6 py-8 text-center text-brand-text-dim">
-            <p>&copy; 2025 Spring Drinks. Admin Panel.</p>
-        </div>
-    </footer>
-
-    <script src="admin.js"></script>
+<script src="admin.js"></script>
 </body>
 </html>

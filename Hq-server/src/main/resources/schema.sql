@@ -1,13 +1,42 @@
 -- ========================
--- DRINKS TABLE
+-- DRINKS TABLE (MODIFIED)
+-- No longer contains quantity. It's now a catalog of drink types.
 -- ========================
 CREATE TABLE IF NOT EXISTS drinks
 (
     id             BIGINT PRIMARY KEY AUTO_INCREMENT,
-    drink_name     VARCHAR(255) UNIQUE NOT NULL, -- Added NOT NULL
-    drink_quantity INT NOT NULL,                 -- Added NOT NULL
-    drink_price    DOUBLE NOT NULL               -- Added NOT NULL
+    drink_name     VARCHAR(255) UNIQUE NOT NULL,
+    drink_price    DOUBLE NOT NULL
 );
+
+-- ========================
+-- BRANCH_STOCK TABLE (NEW)
+-- This table will manage the inventory for each drink at each branch.
+-- ========================
+CREATE TABLE IF NOT EXISTS branch_stock (
+                                            id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                            branch VARCHAR(50) NOT NULL,
+                                            drink_id BIGINT NOT NULL,
+                                            quantity INT NOT NULL,
+                                            low_stock_threshold INT NOT NULL DEFAULT 10, -- Default low stock threshold
+                                            CONSTRAINT fk_stock_drink_id FOREIGN KEY (drink_id) REFERENCES drinks(id) ON DELETE CASCADE,
+                                            UNIQUE (branch, drink_id) -- Ensures one entry per drink per branch
+);
+
+-- ========================
+-- RESTOCK_REQUESTS TABLE (NEW)
+-- This table will store requests for restocking from branches.
+-- ========================
+CREATE TABLE IF NOT EXISTS restock_requests (
+                                                id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                                branch VARCHAR(50) NOT NULL,
+                                                drink_id BIGINT NOT NULL,
+                                                requested_quantity INT NOT NULL,
+                                                request_date TIMESTAMP NOT NULL,
+                                                fulfilled BOOLEAN NOT NULL DEFAULT FALSE,
+                                                CONSTRAINT fk_restock_drink_id FOREIGN KEY (drink_id) REFERENCES drinks(id) ON DELETE CASCADE
+);
+
 
 -- ========================
 -- CUSTOMERS TABLE
@@ -90,23 +119,4 @@ CREATE TABLE IF NOT EXISTS admins
     password VARCHAR(255) NOT NULL,
     role     VARCHAR(50) DEFAULT 'ADMIN' NOT NULL, -- Added NOT NULL
     last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL -- Added NOT NULL
-);
-
--- ========================
--- BRANCH_INVENTORY TABLE
--- ========================
-CREATE TABLE IF NOT EXISTS branch_inventory
-(
-    id                  BIGINT PRIMARY KEY AUTO_INCREMENT,
-    branch              VARCHAR(50) NOT NULL,
-    drink_id            BIGINT NOT NULL,
-    quantity            INT NOT NULL DEFAULT 0,
-    low_stock_threshold INT NOT NULL DEFAULT 10,
-    last_updated        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-
-    CONSTRAINT fk_branch_inventory_drink_id
-        FOREIGN KEY (drink_id)
-            REFERENCES drinks (id)
-            ON DELETE CASCADE,
-    CONSTRAINT uq_branch_drink UNIQUE (branch, drink_id)
 );

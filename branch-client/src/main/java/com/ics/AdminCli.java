@@ -1,11 +1,6 @@
 package com.ics;
 
-import com.ics.dtos.ConsolidatedSalesReportDto;
-import com.ics.dtos.DrinkDto;
-import com.ics.dtos.RegisterRequest;
-import com.ics.dtos.SalesReportDto;
-import com.ics.dtos.Request;
-import com.ics.dtos.Response;
+import com.ics.dtos.*;
 import com.ics.models.Branch;
 import com.ics.models.Customer;
 
@@ -120,7 +115,8 @@ public class AdminCli {
         System.out.println("1. View Stock");
         System.out.println("2. Update Drinks");
         System.out.println("3. Sales Report");
-        System.out.println("4. Act as Customer");
+        System.out.println("4. View Low Stock");
+        System.out.println("5. Add New Drink Product");
         System.out.println("0. Logout");
         System.out.print("Choose option: ");
 
@@ -130,14 +126,115 @@ public class AdminCli {
             case "1": viewStock(); break;
             case "2": updateDrinks(); break;
             case "3": viewSalesReport(); break;
-            case "4": actAsCustomer(); break;
+            case "4": viewLowStock(); break;
+            case "5": addDrink(); break;
             case "0": logout(); break;
             default: System.out.println("Invalid choice, try again"); break;
         }
     }
 
+    private static void addDrink() {
+        System.out.println("\n=== ADD NEW DRINK PRODUCT ===");
+        try {
+            System.out.print("Enter new drink name: ");
+            String name = scanner.nextLine();
+            System.out.print("Enter price (e.g., 2.50): ");
+            double price = Double.parseDouble(scanner.nextLine());
+            System.out.print("Enter initial quantity for all branches: ");
+            int quantity = Integer.parseInt(scanner.nextLine());
+
+            if (name.trim().isEmpty() || price <= 0 || quantity < 0) {
+                System.out.println("Invalid input. Name cannot be empty, price and quantity must be positive.");
+                return;
+            }
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("drinkName", name);
+            payload.put("drinkPrice", price);
+            payload.put("drinkQuantity", quantity);
+
+            Request request = new Request("ADD_DRINK", payload);
+            Response response = client.sendRequest(request);
+
+            if (response.getStatus() == Response.Status.SUCCESS) {
+                System.out.println("✅ Successfully added '" + name + "' to all branches!");
+            } else {
+                System.out.println("❌ Failed to add drink: " + response.getMessage());
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Invalid number format for price or quantity.");
+        }
+    }
+
+    private static void viewLowStock() {
+        System.out.println("\n=== LOW STOCK ITEMS (ALL BRANCHES) ===");
+        Request request = new Request("GET_LOW_STOCK", null);
+        Response response = client.sendRequest(request);
+
+        if (response.getStatus() == Response.Status.SUCCESS) {
+            List<DrinkDto> drinks = (List<DrinkDto>) response.getData();
+            if (drinks == null || drinks.isEmpty()) {
+                System.out.println("No items are currently low on stock.");
+                return;
+            }
+            System.out.println("ID | Drink Name           | Branch    | Quantity");
+            System.out.println("---|----------------------|-----------|----------");
+            for (DrinkDto drink : drinks) {
+                System.out.printf("%-2d | %-20s | %-9s | %d%n", drink.getId(), drink.getDrinkName(), drink.getBranch(), drink.getDrinkQuantity());
+            }
+
+            System.out.print("\nDo you want to restock an item? (yes/no): ");
+            if (scanner.nextLine().equalsIgnoreCase("yes")) {
+                restockDrinkFromLowStock();
+            }
+
+        } else {
+            System.out.println("Failed to get low stock items: " + response.getMessage());
+        }
+    }
+
+    private static void restockDrinkFromLowStock() {
+        try {
+            System.out.print("Enter the ID of the drink to restock: ");
+            long drinkId = Long.parseLong(scanner.nextLine());
+
+            System.out.print("Enter the Branch Name for the restock: ");
+            String branchName = scanner.nextLine().toUpperCase();
+            try {
+                Branch.valueOf(branchName);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid branch name. Please use one of: NAIROBI, MOMBASA, KISUMU, ELDORET");
+                return;
+            }
+
+            System.out.print("Enter quantity to add: ");
+            int quantity = Integer.parseInt(scanner.nextLine());
+            if (quantity <= 0) {
+                System.out.println("Quantity must be a positive number.");
+                return;
+            }
+
+            Map<String, Object> restockData = new HashMap<>();
+            restockData.put("drinkId", drinkId);
+            restockData.put("branch", branchName);
+            restockData.put("quantity", quantity);
+
+            Request request = new Request("RESTOCK_DRINK", restockData);
+            Response response = client.sendRequest(request);
+
+            if (response.getStatus() == Response.Status.SUCCESS) {
+                System.out.println("Restock successful!");
+            } else {
+                System.out.println("Restock failed: " + response.getMessage());
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number format. Please enter a valid ID and quantity.");
+        }
+    }
+
+
     private static void viewStock() {
-        System.out.println("\n=== CURRENT STOCK ===");
+        System.out.println("\n=== CURRENT STOCK (" + branch.name() + " Branch) ===");
         Request request = new Request("GET_ALL_DRINKS", null);
         Response response = client.sendRequest(request);
 
@@ -154,7 +251,7 @@ public class AdminCli {
     }
 
     private static void updateDrinks() {
-        System.out.println("\n=== UPDATE DRINKS ===");
+        System.out.println("\n=== UPDATE DRINKS (" + branch.name() + " Branch) ===");
         List<DrinkDto> drinks = getDrinks();
         if (drinks == null || drinks.isEmpty()) {
             System.out.println("No drinks found");
@@ -269,7 +366,7 @@ public class AdminCli {
 
             Map<String, Object> reportData = new HashMap<>();
             reportData.put("authToken", authToken);
-            reportData.put("branch", selectedBranch.name()); // Specify the branch
+            reportData.put("branch", selectedBranch.name());
 
             Request request = new Request("GET_SALES_REPORT", reportData);
             Response response = client.sendRequest(request);
@@ -331,8 +428,6 @@ public class AdminCli {
 
     private static void actAsCustomer() {
         System.out.println("\n=== CUSTOMER MODE ===\nPlacing order from " + branch.name() + " branch");
-        Customer adminCustomer = new Customer();
-        adminCustomer.setCustomer_name("Admin Customer");
-        adminCustomer.setCustomerPhoneNumber("0700000000");
+        System.out.println("This functionality is not fully implemented in the CLI.");
     }
 }

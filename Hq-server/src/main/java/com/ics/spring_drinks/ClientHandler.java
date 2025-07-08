@@ -28,7 +28,6 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            // Set socket timeout
             clientSocket.setSoTimeout(CLIENT_TIMEOUT);
 
             try (ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -36,7 +35,6 @@ public class ClientHandler implements Runnable {
 
                 System.out.println("📡 Connection established with " + clientId);
 
-                // Step 1: Read initial request (CONNECT or CONNECT_ADMIN)
                 Object initialRequestObject = in.readObject();
                 if (!(initialRequestObject instanceof Request initialRequest)) {
                     sendResponse(out, Response.Status.ERROR, null, "Handshake failed: Invalid request object.");
@@ -60,7 +58,6 @@ public class ClientHandler implements Runnable {
                     return;
                 }
 
-                // Step 3: Loop to process ongoing requests
                 while (true) {
                     try {
                         Request request = (Request) in.readObject();
@@ -84,6 +81,7 @@ public class ClientHandler implements Runnable {
             }
         } catch (Exception e) {
             System.err.println("❌ Client error (" + clientId + "): " + e.getMessage());
+            e.printStackTrace();
         } finally {
             cleanup();
         }
@@ -102,7 +100,7 @@ public class ClientHandler implements Runnable {
                 case "ADD_DRINK" -> handleAddDrink(request);
                 case "UPDATE_DRINK" -> handleUpdateDrink(request);
                 case "GET_SALES_REPORT" -> handleSalesReport(request);
-                case "GET_LOW_STOCK" -> handleGetLowStock(); // NEW: Handle request
+                case "GET_LOW_STOCK" -> handleGetLowStock();
                 case "RESTOCK_DRINK" -> handleRestockDrink(request);
                 default -> errorResponse("Unknown request type: " + request.getType());
             };
@@ -112,9 +110,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    /**
-     * NEW: Handles the request to get all low stock items.
-     */
     private Response handleGetLowStock() {
         if (!isAdminBranch()) return adminOnlyError();
         try {
@@ -254,7 +249,9 @@ public class ClientHandler implements Runnable {
     private void cleanup() {
         try {
             if (assignedBranch != null) {
-                branchManager.unassignBranch(clientId, assignedBranch);
+                // MODIFIED: Call unassignBranch with the socket's InetAddress for proper removal from the IP map.
+                System.out.println("🧹 Cleaning up TCP client and unassigning branch for IP: " + clientSocket.getInetAddress().getHostAddress());
+                branchManager.unassignBranch(clientSocket.getInetAddress());
             }
             if (clientSocket != null && !clientSocket.isClosed()) {
                 clientSocket.close();

@@ -10,10 +10,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 @Component
 public class BranchManager {
-    private final Map<String, Branch> clientBranches = new ConcurrentHashMap<>();
+    // Key: IP Address (String), Value: Assigned Branch
+    private final Map<String, Branch> ipToBranchMap = new ConcurrentHashMap<>();
     private final Set<Branch> assignedBranches = new ConcurrentSkipListSet<>();
     private final Object lock = new Object();
 
@@ -23,33 +25,58 @@ public class BranchManager {
     public Branch assignBranch(String clientId, InetAddress clientAddress, boolean isAdmin) throws IOException {
         synchronized (lock) {
             String clientIp = clientAddress.getHostAddress();
-            System.out.println("🔍 Assigning branch for client IP: " + clientIp + ", isAdmin: " + isAdmin);
+            System.out.println("🔍 Request to assign branch for IP: " + clientIp + " (Client ID: " + clientId + ", isAdmin: " + isAdmin + ")");
 
-            Branch branch = findAvailableBranch(clientIp, isAdmin);
+            // Step 1: Check if this IP address already has an assigned branch.
+            if (ipToBranchMap.containsKey(clientIp)) {
+                Branch existingBranch = ipToBranchMap.get(clientIp);
+                System.out.println("✅ IP " + clientIp + " already has branch " + existingBranch.name() + ". Re-assigning.");
+                return existingBranch;
+            }
 
-            if (branch == null) {
+            // Step 2: If no existing assignment, find a new available branch.
+            System.out.println("🤔 IP " + clientIp + " is new. Finding an available branch...");
+            Branch newBranch = findAvailableBranch(clientIp, isAdmin);
+
+            if (newBranch == null) {
                 System.out.println("❌ No available branches. Currently assigned: " + assignedBranches);
                 printCurrentAssignments();
                 throw new IOException("No available branches. All " + Branch.values().length + " branches are occupied.");
             }
 
-            clientBranches.put(clientId, branch);
-            assignedBranches.add(branch);
+            // Step 3: Store the new assignment.
+            ipToBranchMap.put(clientIp, newBranch);
+            assignedBranches.add(newBranch);
 
-            System.out.println("🏢 Assigned " + branch.name() + " to client " + clientId + " (IP: " + clientIp + ")");
+            System.out.println("🏢 Assigned " + newBranch.name() + " to IP " + clientIp);
             System.out.println("📊 Branches assigned: " + assignedBranches.size() + "/" + Branch.values().length);
+            printCurrentAssignments();
 
-            return branch;
+            return newBranch;
         }
     }
 
-    public void unassignBranch(String clientId, Branch branch) {
+    /**
+     * Unassigns a branch based on the client's IP address.
+     * This is primarily for TCP clients that have a clear disconnect event.
+     * @param clientAddress The address of the disconnecting client.
+     */
+    public void unassignBranch(InetAddress clientAddress) {
         synchronized (lock) {
-            if (branch != null && branch.equals(clientBranches.get(clientId))) {
-                clientBranches.remove(clientId);
-                assignedBranches.remove(branch);
-                System.out.println("🔓 Unassigned " + branch.name() + " from client " + clientId);
+            if (clientAddress == null) return;
+            String clientIp = clientAddress.getHostAddress();
+
+            if (ipToBranchMap.containsKey(clientIp)) {
+                Branch branchToUnassign = ipToBranchMap.get(clientIp);
+
+                ipToBranchMap.remove(clientIp);
+                assignedBranches.remove(branchToUnassign);
+
+                System.out.println("🔓 Unassigned " + branchToUnassign.name() + " from IP " + clientIp);
                 System.out.println("📊 Branches assigned: " + assignedBranches.size() + "/" + Branch.values().length);
+                printCurrentAssignments();
+            } else {
+                System.out.println("⚠️ Could not unassign branch for IP " + clientIp + ": No assignment found.");
             }
         }
     }
@@ -103,8 +130,8 @@ public class BranchManager {
         return false;
     }
 
-    public Map<String, Branch> getClientBranches() {
-        return new ConcurrentHashMap<>(clientBranches);
+    public Map<String, Branch> getIpToBranchMap() {
+        return new ConcurrentHashMap<>(ipToBranchMap);
     }
 
     public Set<Branch> getAssignedBranches() {
@@ -112,25 +139,22 @@ public class BranchManager {
     }
 
     public void printCurrentAssignments() {
-        System.out.println("=== Current Branch Assignments ===");
-        if (clientBranches.isEmpty()) {
-            System.out.println("No clients currently connected.");
+        System.out.println("=== Current Branch Assignments by IP ===");
+        if (ipToBranchMap.isEmpty()) {
+            System.out.println("No clients currently have an assigned branch.");
         } else {
-            clientBranches.forEach((clientId, branch) ->
-                    System.out.println("Client: " + clientId + " -> Branch: " + branch.name()));
+            ipToBranchMap.forEach((ip, branch) ->
+                    System.out.println("IP: " + ip + " -> Branch: " + branch.name()));
         }
-        System.out.println("Assigned branches: " + assignedBranches);
+        System.out.println("Total assigned branches set: " + assignedBranches);
         System.out.println("Available branches: " + getAvailableBranches());
-        System.out.println("==============================");
+        System.out.println("==========================================");
     }
 
     private Set<Branch> getAvailableBranches() {
-        Set<Branch> available = new ConcurrentSkipListSet<>();
-        for (Branch branch : Branch.values()) {
-            if (!assignedBranches.contains(branch)) {
-                available.add(branch);
-            }
-        }
-        return available;
+        Set<Branch> allBranches = Set.of(Branch.values());
+        return allBranches.stream()
+                .filter(branch -> !assignedBranches.contains(branch))
+                .collect(Collectors.toSet());
     }
 }

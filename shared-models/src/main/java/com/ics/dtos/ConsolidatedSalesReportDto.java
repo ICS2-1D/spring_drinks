@@ -18,6 +18,5 @@ public class ConsolidatedSalesReportDto implements Serializable {
 
     private double grandTotalSales;
 
-
     private Map<Branch, SalesReportDto> salesByBranch;
 }

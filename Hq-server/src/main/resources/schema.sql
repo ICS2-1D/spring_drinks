@@ -1,4 +1,3 @@
-
 -- ========================
 -- DRINKS TABLE
 -- ========================
@@ -91,4 +90,23 @@ CREATE TABLE IF NOT EXISTS admins
     password VARCHAR(255) NOT NULL,
     role     VARCHAR(50) DEFAULT 'ADMIN' NOT NULL, -- Added NOT NULL
     last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL -- Added NOT NULL
+);
+
+-- ========================
+-- BRANCH_INVENTORY TABLE
+-- ========================
+CREATE TABLE IF NOT EXISTS branch_inventory
+(
+    id                  BIGINT PRIMARY KEY AUTO_INCREMENT,
+    branch              VARCHAR(50) NOT NULL,
+    drink_id            BIGINT NOT NULL,
+    quantity            INT NOT NULL DEFAULT 0,
+    low_stock_threshold INT NOT NULL DEFAULT 10,
+    last_updated        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+    CONSTRAINT fk_branch_inventory_drink_id
+        FOREIGN KEY (drink_id)
+            REFERENCES drinks (id)
+            ON DELETE CASCADE,
+    CONSTRAINT uq_branch_drink UNIQUE (branch, drink_id)
 );
